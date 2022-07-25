@@ -26,6 +26,7 @@ export async function main(ns) {
 
 		rootServers(ns);
 		await infect(ns, 'v.js');
+		writeMessagesFromPort1(ns);
 
 		let allServers = getServers(ns);
 
@@ -69,4 +70,14 @@ export async function main(ns) {
 
 		await ns.sleep(10000);
 	}
+}
+
+/** @param {NS} ns */
+function writeMessagesFromPort1(ns) {
+	let info;
+	do {
+		info = ns.readPort(1);
+		if (info != 'NULL PORT DATA')
+			ns.print(`SUCCESS ${info}`);
+	} while (info != 'NULL PORT DATA')
 }
