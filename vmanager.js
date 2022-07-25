@@ -11,10 +11,11 @@ export async function main(ns) {
 	let whatToDo = (s) => highSecurity(s) ? "weaken" : lowMoney(s) ? "grow" : "hack"
 
 	let freeRam0 = (s) => ns.getServerMaxRam(s) - ns.getServerUsedRam(s)
-	let freeRam = (s) => s == "home" ? freeRam0(s) - 10 : freeRam0(s);
+	let freeRam = (s) => s == "home" ? freeRam0(s) - 20 : freeRam0(s);
 	let threadsToHack = (s) => Math.ceil(Math.trunc(ns.getServerMaxMoney(s) / ns.hackAnalyze(s) / 2));
 	let threadsToWeaken = (s) => Math.ceil((ns.getServerSecurityLevel(s) - (ns.getServerMinSecurityLevel(s))) / ns.weakenAnalyze(1, 1));
 	let threadsToGrow = (s) => Math.ceil(ns.growthAnalyze(s, ns.getServerMaxMoney(s) - ns.getServerMoneyAvailable(s), 1));
+	let hackAnalyze = (s) => ns.getServerMoneyAvailable(s) * ns.hackAnalyze(s);
 
 	let vRam = ns.getScriptRam("v.js");
 	let availableThreads = (s) => Math.trunc(freeRam(s) / vRam);
@@ -51,7 +52,7 @@ export async function main(ns) {
 						threadsToHack(s.hostname);
 		}
 
-		serversToHack = serversToHack.sort((a, b) => a.needThreads - b.needThreads);
+		serversToHack = serversToHack.sort((a, b) => hackAnalyze(a.hostname) - hackAnalyze(b.hostname));
 
 		for (let serverForWork of serversForWork) {
 			serverForWork.availableThreads = availableThreads(serverForWork.hostname);
