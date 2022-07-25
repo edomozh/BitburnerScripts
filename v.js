@@ -8,6 +8,4 @@ export async function main(ns) {
 		case "grow": await ns.grow(server); break;
 		case "hack": await ns.hack(server); break;
 	}
-
-	ns.writePort(1, server);
 }

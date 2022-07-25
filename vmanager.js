@@ -4,9 +4,10 @@ import { getServers, rootServers, infect } from 'core.js'
 export async function main(ns) {
 	ns.tail();
 	ns.disableLog("ALL");
+	ns.clearLog();
 
 	let highSecurity = (s) => ns.getServerSecurityLevel(s) > ns.getServerMinSecurityLevel(s) + 5;
-	let lowMoney = (s) => ns.getServerMoneyAvailable(s) < ns.getServerMaxMoney(s) * 0.8;
+	let lowMoney = (s) => ns.getServerMoneyAvailable(s) < ns.getServerMaxMoney(s) * 0.9;
 	let whatToDo = (s) => highSecurity(s) ? "weaken" : lowMoney(s) ? "grow" : "hack"
 
 	let freeRam0 = (s) => ns.getServerMaxRam(s) - ns.getServerUsedRam(s)
@@ -18,31 +19,29 @@ export async function main(ns) {
 	let vRam = ns.getScriptRam("v.js");
 	let availableThreads = (s) => Math.trunc(freeRam(s) / vRam);
 
-	let busyServers = [];
+	let pidRunningScripts = [];
 
 	while (true) {
-
-		let portData;
-		do {
-			portData = ns.readPort(1);
-			let index = busyServers.indexOf(portData);
-			if (index > -1) busyServers.splice(index, 1);
-		} while (portData != "NULL PORT DATA")
-
-		ns.print(`INFO Busy Servers: ${busyServers.length < 3 ? busyServers : busyServers.length}`);
 
 		rootServers(ns);
 		await infect(ns, 'v.js');
 
 		let allServers = getServers(ns);
 
+		pidRunningScripts = pidRunningScripts.filter(p => ns.getRunningScript(p) != null);
+
+		let busyServers = pidRunningScripts.map(p => ns.getRunningScript(p).args[0]);
+		ns.print(`\n${busyServers.length} Busy Servers: ${busyServers}`);
+
 		let serversForWork = allServers
 			.filter(s => s.hasAdminRights && freeRam(s.hostname) > vRam)
 			.sort((a, b) => freeRam(b.hostname) - freeRam(a.hostname));
+		ns.print(`\n${serversForWork.length} Servers For Work: ${serversForWork.map(s => s.hostname)}`);
 
 		let serversToHack = allServers
 			.filter(s => s.hasAdminRights && !!s.moneyMax && !s.purchasedByPlayer)
 			.filter(s => !busyServers.includes(s.hostname));
+		ns.print(`\n${serversToHack.length} Servers To Hack: ${serversToHack.map(s => s.hostname)}`);
 
 		for (let s of serversToHack) {
 			s.whatToDo = whatToDo(s.hostname);
@@ -59,14 +58,10 @@ export async function main(ns) {
 
 			while (freeRam(serverForWork.hostname) > vRam && serversToHack.length > 0) {
 				let serverToHack = serversToHack.pop();
-
 				let threads = serverForWork.availableThreads > serverToHack.needThreads ? serverToHack.needThreads : serverForWork.availableThreads;
-
+				let pid = ns.exec('v.js', serverForWork.hostname, threads, serverToHack.hostname, serverToHack.whatToDo);
+				pidRunningScripts.push(pid);
 				ns.print(`INFO run v.js on ${serverForWork.hostname} with ${threads} threads to ${serverToHack.whatToDo} ${serverToHack.hostname}`);
-				ns.exec('v.js', serverForWork.hostname, threads, serverToHack.hostname, serverToHack.whatToDo);
-
-				busyServers.push(serverToHack.hostname);
-
 				await ns.sleep(1000);
 			}
 		}
