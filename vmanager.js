@@ -62,7 +62,7 @@ export async function main(ns) {
 		for (let serverForWork of serversForWork) {
 			serverForWork.availableThreads = availableThreads(serverForWork.hostname);
 
-			while (freeRam(serverForWork.hostname) > scriptRam) {
+			while (serverForWork.availableThreads >= 1) {
 				if (serversToHack.length > 0) {
 					let serverToHack = serversToHack.pop();
 					let threads = serverForWork.availableThreads > serverToHack.needThreads ? serverToHack.needThreads : serverForWork.availableThreads;
@@ -73,6 +73,7 @@ export async function main(ns) {
 				} else if (poorestServer) {
 					ns.exec('v.js', serverForWork.hostname, serverForWork.availableThreads, poorestServer.hostname, "grow");
 					ns.print(`INFO run v.js on ${serverForWork.hostname} with ${serverForWork.availableThreads} threads to grow poorest server`);
+					serverForWork.availableThreads = 0;
 				}
 
 				await ns.sleep(100);
