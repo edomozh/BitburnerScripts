@@ -54,7 +54,7 @@ export async function main(ns) {
 		}
 
 		let poorestServer = serversToHack.sort((a, b) => moneyPercent(a.hostname) - moneyPercent(b.hostname))[0];
-		ns.print(`Poorest server: ${poorestServer.hostname || poorestServer}`);
+		ns.print(`Poorest server: ${poorestServer ? poorestServer.hostname : null}`);
 
 		serversToHack = serversToHack.sort((a, b) => hackAnalyze(a.hostname) - hackAnalyze(b.hostname));
 		ns.print(`${serversToHack.length} Servers to hack: ${serversToHack.map(s => s.hostname)}`);
