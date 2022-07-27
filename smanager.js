@@ -2,12 +2,13 @@
 export async function main(ns) {
 	ns.tail();
 	ns.disableLog("ALL");
+	ns.clearLog();
 
 	let maxservers = ns.args[0] || 10;
-	let startram = Math.pow(2, 4); // 16
+	let startram = Math.pow(2, 5); // 32 (3.5m)
 	let maxram = Math.pow(2, 15); // 32,768
 	let endless = false;
-	
+
 	let money = () => ns.getPlayer().money;
 	let scost = (r) => ns.getPurchasedServerCost(r);
 	let servers = () => ns.getPurchasedServers();
@@ -25,9 +26,17 @@ export async function main(ns) {
 		ns.print(`INFO ${w} ${r} deleted`);
 	}
 
+	function logNextServerCost(r) {
+		let ram = count() ? sram(largest()) * 2 : startram;
+		ns.print(`INFO Next server with ${ram} RAM will cost ${scost(ram).toLocaleString()}$`);
+	}
+
+	logNextServerCost();
+
 	async function purchase(r) {
 		let name = ns.purchaseServer(`home`, r);
-		ns.print(`INFO ${name} ${r} purchased for ${scost(r).toLocaleString()}`);
+		ns.print(`INFO ${name} with ${r} RAM purchased for ${scost(r).toLocaleString()}$`);
+		logNextServerCost(r * 2)
 	}
 
 	while (true) {
