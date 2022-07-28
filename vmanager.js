@@ -48,13 +48,13 @@ export async function main(ns) {
 			worker.wthreads = threads(worker.hostname);
 
 			while (worker.wthreads >= 1) {
-				let victim = targets.pop();
-				if (victim) {
-					calcNeededAction(victim);
-					let threads = Math.min(worker.wthreads, victim.vthreads);
+				let target = targets.pop();
+				if (target) {
+					calcNeededAction(target);
+					let threads = Math.min(worker.wthreads, target.vthreads);
 					worker.wthreads -= threads;
-					ns.print(`INFO run ${scriptName} on ${worker.hostname} with ${threads} threads to ${victim.action} ${victim.hostname}`);
-					let pid = ns.exec(scriptName, worker.hostname, threads, victim.hostname, victim.action);
+					ns.print(`INFO run ${scriptName} on ${worker.hostname} with ${threads} threads to ${target.action} ${target.hostname}`);
+					let pid = ns.exec(scriptName, worker.hostname, threads, target.hostname, target.action);
 					scripts.push(pid);
 				} else {
 					ns.print(`INFO run ${scriptName} on ${worker.hostname} with ${worker.wthreads} threads to grow poorest server`);
