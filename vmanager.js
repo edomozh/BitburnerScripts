@@ -9,7 +9,7 @@ export async function main(ns) {
 	let scriptName = "v.js";
 
 	let fullness = (s) => Math.trunc((ns.getServerMoneyAvailable(s) / ns.getServerMaxMoney(s)) * 100);
-	let freeRam = (s) => s == "home" ? ns.getServerMaxRam(s) - ns.getServerUsedRam(s) - 20 : ns.getServerMaxRam(s) - ns.getServerUsedRam(s);
+	let freeRam = (s) => ns.getServerMaxRam(s) - ns.getServerUsedRam(s) - (s == "home" ? 20 : 0);
 	let threads = (s) => Math.trunc(freeRam(s) / ns.getScriptRam(scriptName));
 
 	let scripts = [];
