@@ -36,14 +36,19 @@ export async function main(ns) {
 		let busyServers = pidRunningScripts.map(p => ns.getRunningScript(p).args[0]);
 		ns.print(`${busyServers.length} Busy servers: ${busyServers}`);
 
+		let serversToHack = allServers
+			.filter(s => s.hasAdminRights && !!s.moneyMax && !s.purchasedByPlayer);
+
+		let poorestServer = serversToHack.sort((a, b) => moneyPercent(a.hostname) - moneyPercent(b.hostname))[0];
+		ns.print(`Poorest server: ${poorestServer.hostname}`);
+
+		serversToHack = serversToHack.filter(s => !busyServers.includes(s.hostname));
+		ns.print(`${serversToHack.length} Servers to hack: ${serversToHack.map(s => s.hostname)}`);
+
 		let serversForWork = allServers
 			.filter(s => s.hasAdminRights && freeRam(s.hostname) > scriptRam)
 			.sort((a, b) => freeRam(b.hostname) - freeRam(a.hostname));
 		ns.print(`${serversForWork.length} Servers for work: ${serversForWork.map(s => s.hostname)}`);
-
-		let serversToHack = allServers
-			.filter(s => s.hasAdminRights && !!s.moneyMax && !s.purchasedByPlayer)
-			.filter(s => !busyServers.includes(s.hostname));
 
 		for (let s of serversToHack) {
 			s.whatToDo = whatToDo(s.hostname);
@@ -53,11 +58,7 @@ export async function main(ns) {
 						threadsToHack(s.hostname);
 		}
 
-		let poorestServer = serversToHack.sort((a, b) => moneyPercent(a.hostname) - moneyPercent(b.hostname))[0];
-		ns.print(`Poorest server: ${poorestServer ? poorestServer.hostname : null}`);
-
 		serversToHack = serversToHack.sort((a, b) => hackAnalyze(a.hostname) - hackAnalyze(b.hostname));
-		ns.print(`${serversToHack.length} Servers to hack: ${serversToHack.map(s => s.hostname)}`);
 
 		for (let serverForWork of serversForWork) {
 			serverForWork.availableThreads = availableThreads(serverForWork.hostname);
@@ -70,7 +71,7 @@ export async function main(ns) {
 					let pid = ns.exec('v.js', serverForWork.hostname, threads, serverToHack.hostname, serverToHack.whatToDo);
 					pidRunningScripts.push(pid);
 					ns.print(`INFO run v.js on ${serverForWork.hostname} with ${threads} threads to ${serverToHack.whatToDo} ${serverToHack.hostname}`);
-				} else if (poorestServer) {
+				} else {
 					ns.exec('v.js', serverForWork.hostname, serverForWork.availableThreads, poorestServer.hostname, "grow");
 					ns.print(`INFO run v.js on ${serverForWork.hostname} with ${serverForWork.availableThreads} threads to grow poorest server`);
 					serverForWork.availableThreads = 0;
