@@ -45,21 +45,21 @@ export async function main(ns) {
 		ns.print(`${workers.length} workers: ${workers.map(s => s.hostname)}`);
 
 		for (let worker of workers) {
-			worker.wthreads = threads(worker.hostname);
+			worker.resource = threads(worker.hostname);
 
-			while (worker.wthreads >= 1) {
+			while (worker.resource >= 1) {
 				let target = targets.pop();
 				if (target) {
 					calcNeededAction(target);
-					let threads = Math.min(worker.wthreads, target.vthreads);
-					worker.wthreads -= threads;
+					let threads = Math.min(worker.resource, target.capacity);
+					worker.resource -= threads;
 					ns.print(`INFO run ${scriptName} on ${worker.hostname} with ${threads} threads to ${target.action} ${target.hostname}`);
 					let pid = ns.exec(scriptName, worker.hostname, threads, target.hostname, target.action);
 					scripts.push(pid);
 				} else {
-					ns.print(`INFO run ${scriptName} on ${worker.hostname} with ${worker.wthreads} threads to grow poorest server`);
-					ns.exec(scriptName, worker.hostname, worker.wthreads, poor.hostname, "grow");
-					worker.wthreads = 0;
+					ns.print(`INFO run ${scriptName} on ${worker.hostname} with ${worker.resource} threads to grow poorest server`);
+					ns.exec(scriptName, worker.hostname, worker.resource, poor.hostname, "grow");
+					worker.resource = 0;
 				}
 
 				await ns.sleep(100);
@@ -80,9 +80,9 @@ export async function main(ns) {
 
 		target.action = neededAction(target.hostname);
 		switch (target.action) {
-			case "weaken": target.vthreads = weakenThreads(target.hostname); break;
-			case "grow": target.vthreads = growThresds(target.hostname); break;
-			default: target.vthreads = hackThreads(target.hostname); break;
+			case "weaken": target.capacity = weakenThreads(target.hostname); break;
+			case "grow": target.capacity = growThresds(target.hostname); break;
+			default: target.capacity = hackThreads(target.hostname); break;
 		}
 	}
 
