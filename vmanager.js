@@ -6,75 +6,60 @@ export async function main(ns) {
 	ns.disableLog("ALL");
 	ns.clearLog();
 
-	let moneyPercent = (s) => ns.getServerMoneyAvailable(s) / ns.getServerMaxMoney(s);
-	let highSecurity = (s) => ns.getServerSecurityLevel(s) > ns.getServerMinSecurityLevel(s) + 5;
-	let lowMoney = (s) => ns.getServerMoneyAvailable(s) < ns.getServerMaxMoney(s) * 0.9;
-	let whatToDo = (s) => highSecurity(s) ? "weaken" : lowMoney(s) ? "grow" : "hack"
-	let freeRam0 = (s) => ns.getServerMaxRam(s) - ns.getServerUsedRam(s)
-	let freeRam = (s) => s == "home" ? freeRam0(s) - 20 : freeRam0(s);
-	let threadsToHack = (s) => Math.ceil(Math.trunc(ns.getServerMaxMoney(s) / ns.hackAnalyze(s) / 2));
-	let threadsToWeaken = (s) => Math.ceil((ns.getServerSecurityLevel(s) - (ns.getServerMinSecurityLevel(s))) / ns.weakenAnalyze(1, 1));
-	let threadsToGrow = (s) => Math.ceil(ns.growthAnalyze(s, ns.getServerMaxMoney(s) - ns.getServerMoneyAvailable(s), 1));
-	let hackAnalyze = (s) => ns.getServerMoneyAvailable(s) * ns.hackAnalyze(s);
+	let scriptName = "v.js";
 
-	let scriptRam = ns.getScriptRam("v.js");
-	let availableThreads = (s) => Math.trunc(freeRam(s) / scriptRam);
+	let fullness = (s) => ns.getServerMoneyAvailable(s) / ns.getServerMaxMoney(s);
+	let freeRam = (s) => s == "home" ? ns.getServerMaxRam(s) - ns.getServerUsedRam(s) - 20 : ns.getServerMaxRam(s) - ns.getServerUsedRam(s);
+	let threads = (s) => Math.trunc(freeRam(s) / ns.getScriptRam(scriptName));
 
-	let pidRunningScripts = [];
+	let scripts = [];
 
 	while (true) {
 		ns.print("WARNING NEW RUN")
 
 		rootServers(ns);
-		await infect(ns, 'v.js');
-		writeMessagesFromPort1(ns);
 
-		let allServers = getServers(ns);
+		await infect(ns, scriptName);
 
-		pidRunningScripts = pidRunningScripts.filter(p => ns.getRunningScript(p) != null);
+		logMessagesFromPort1(ns);
 
-		let busyServers = pidRunningScripts.map(p => ns.getRunningScript(p).args[0]);
-		ns.print(`${busyServers.length} Busy servers: ${busyServers}`);
+		let servers = getServers(ns);
 
-		let serversToHack = allServers
-			.filter(s => s.hasAdminRights && !!s.moneyMax && !s.purchasedByPlayer);
+		scripts = scripts.filter(p => ns.getRunningScript(p) != null);
 
-		let poorestServer = serversToHack.sort((a, b) => moneyPercent(a.hostname) - moneyPercent(b.hostname))[0];
-		ns.print(`Poorest server: ${poorestServer.hostname}`);
+		let busy = scripts.map(p => ns.getRunningScript(p).args[0]);
 
-		serversToHack = serversToHack.filter(s => !busyServers.includes(s.hostname));
-		ns.print(`${serversToHack.length} Servers to hack: ${serversToHack.map(s => s.hostname)}`);
+		let targets = servers.filter(s => s.hasAdminRights && !!s.moneyMax && !s.purchasedByPlayer);
 
-		let serversForWork = allServers
-			.filter(s => s.hasAdminRights && freeRam(s.hostname) > scriptRam)
-			.sort((a, b) => freeRam(b.hostname) - freeRam(a.hostname));
-		ns.print(`${serversForWork.length} Servers for work: ${serversForWork.map(s => s.hostname)}`);
+		let workers = servers.filter(s => s.hasAdminRights && freeRam(s.hostname) > ns.getScriptRam(scriptName));
 
-		for (let s of serversToHack) {
-			s.whatToDo = whatToDo(s.hostname);
-			s.needThreads =
-				s.whatToDo == "weaken" ? threadsToWeaken(s.hostname) :
-					s.whatToDo == "grow" ? threadsToGrow(s.hostname) :
-						threadsToHack(s.hostname);
-		}
+		let poor = targets.sort((a, b) => fullness(a.hostname) - fullness(b.hostname))[0];
 
-		serversToHack = serversToHack.sort((a, b) => hackAnalyze(a.hostname) - hackAnalyze(b.hostname));
+		targets = targets.filter(s => !busy.includes(s.hostname));
 
-		for (let serverForWork of serversForWork) {
-			serverForWork.availableThreads = availableThreads(serverForWork.hostname);
+		workers = workers.sort((a, b) => freeRam(b.hostname) - freeRam(a.hostname));
+		targets = targets.sort((a, b) => ns.getServerMaxMoney(a.hostname) - ns.getServerMaxMoney(b.hostname));
 
-			while (serverForWork.availableThreads >= 1) {
-				if (serversToHack.length > 0) {
-					let serverToHack = serversToHack.pop();
-					let threads = serverForWork.availableThreads > serverToHack.needThreads ? serverToHack.needThreads : serverForWork.availableThreads;
-					serverForWork.availableThreads = serverForWork.availableThreads - threads;
-					let pid = ns.exec('v.js', serverForWork.hostname, threads, serverToHack.hostname, serverToHack.whatToDo);
-					pidRunningScripts.push(pid);
-					ns.print(`INFO run v.js on ${serverForWork.hostname} with ${threads} threads to ${serverToHack.whatToDo} ${serverToHack.hostname}`);
+		ns.print(`${busy.length} busy now: ${busy}`);
+		ns.print(`${targets.length} targets: ${targets.map(s => s.hostname)}`);
+		ns.print(`${workers.length} workers: ${workers.map(s => s.hostname)}`);
+
+		for (let worker of workers) {
+			worker.wthreads = threads(worker.hostname);
+
+			while (worker.wthreads >= 1) {
+				let victim = targets.pop();
+				if (victim) {
+					calcVictim(victim);
+					let threads = Math.min(worker.wthreads, victim.vthreads);
+					worker.wthreads -= threads;
+					ns.print(`INFO run ${scriptName} on ${worker.hostname} with ${threads} threads to ${victim.action} ${victim.hostname}`);
+					let pid = ns.exec(scriptName, worker.hostname, threads, victim.hostname, victim.action);
+					scripts.push(pid);
 				} else {
-					ns.exec('v.js', serverForWork.hostname, serverForWork.availableThreads, poorestServer.hostname, "grow");
-					ns.print(`INFO run v.js on ${serverForWork.hostname} with ${serverForWork.availableThreads} threads to grow poorest server`);
-					serverForWork.availableThreads = 0;
+					ns.print(`INFO run ${scriptName} on ${worker.hostname} with ${worker.wthreads} threads to grow poorest server`);
+					ns.exec(scriptName, worker.hostname, worker.wthreads, poor.hostname, "grow");
+					worker.wthreads = 0;
 				}
 
 				await ns.sleep(100);
@@ -83,14 +68,30 @@ export async function main(ns) {
 
 		await ns.sleep(10000);
 	}
-}
 
-/** @param {NS} ns */
-function writeMessagesFromPort1(ns) {
-	let info;
-	do {
-		info = ns.readPort(1);
-		if (info != 'NULL PORT DATA')
-			ns.print(`SUCCESS ${info}`);
-	} while (info != 'NULL PORT DATA')
+	function calcVictim(victim) {
+		let tooAnxious = (s) => ns.getServerSecurityLevel(s) > ns.getServerMinSecurityLevel(s) + 5;
+		let tooPoor = (s) => ns.getServerMoneyAvailable(s) < ns.getServerMaxMoney(s) * 0.9;
+		let neededAction = (s) => tooAnxious(s) ? "weaken" : tooPoor(s) ? "grow" : "hack";
+
+		let hackThreads = (s) => Math.ceil(Math.trunc(ns.getServerMaxMoney(s) / ns.hackAnalyze(s) / 2));
+		let weakenThreads = (s) => Math.ceil((ns.getServerSecurityLevel(s) - (ns.getServerMinSecurityLevel(s))) / ns.weakenAnalyze(1, 1));
+		let growThresds = (s) => Math.ceil(ns.growthAnalyze(s, ns.getServerMaxMoney(s) - ns.getServerMoneyAvailable(s), 1));
+
+		victim.action = neededAction(victim.hostname);
+		switch (victim.action) {
+			case "weaken": victim.vthreads = weakenThreads(victim.hostname); break;
+			case "grow": victim.vthreads = growThresds(victim.hostname); break;
+			default: victim.vthreads = hackThreads(victim.hostname); break;
+		}
+	}
+
+	function logMessagesFromPort1() {
+		let info;
+		do {
+			info = ns.readPort(1);
+			if (info != 'NULL PORT DATA')
+				ns.print(`SUCCESS ${info}`);
+		} while (info != 'NULL PORT DATA')
+	}
 }
