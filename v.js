@@ -8,7 +8,7 @@ export async function main(ns) {
 		case "grow": await ns.grow(server); break;
 		case "hack":
 			let stolen = await ns.hack(server);
-			ns.writePort(1, `${stolen.toLocaleString()} was stolen from the ${server}`)
+			ns.writePort(1, `${stolen.toLocaleString()}$ was stolen from the ${server}`)
 			break;
 	}
 }
