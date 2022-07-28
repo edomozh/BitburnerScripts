@@ -21,7 +21,7 @@ export async function main(ns) {
 
 		await infect(ns, scriptName);
 
-		logMessagesFromPort1(ns);
+		logMessagesFromPort(1);
 
 		let servers = getServers(ns);
 
@@ -50,7 +50,7 @@ export async function main(ns) {
 			while (worker.wthreads >= 1) {
 				let victim = targets.pop();
 				if (victim) {
-					calcVictim(victim);
+					calcNeededAction(victim);
 					let threads = Math.min(worker.wthreads, victim.vthreads);
 					worker.wthreads -= threads;
 					ns.print(`INFO run ${scriptName} on ${worker.hostname} with ${threads} threads to ${victim.action} ${victim.hostname}`);
@@ -69,7 +69,7 @@ export async function main(ns) {
 		await ns.sleep(10000);
 	}
 
-	function calcVictim(victim) {
+	function calcNeededAction(target) {
 		let tooAnxious = (s) => ns.getServerSecurityLevel(s) > ns.getServerMinSecurityLevel(s) + 5;
 		let tooPoor = (s) => ns.getServerMoneyAvailable(s) < ns.getServerMaxMoney(s) * 0.9;
 		let neededAction = (s) => tooAnxious(s) ? "weaken" : tooPoor(s) ? "grow" : "hack";
@@ -78,18 +78,18 @@ export async function main(ns) {
 		let weakenThreads = (s) => Math.ceil((ns.getServerSecurityLevel(s) - (ns.getServerMinSecurityLevel(s))) / ns.weakenAnalyze(1, 1));
 		let growThresds = (s) => Math.ceil(ns.growthAnalyze(s, ns.getServerMaxMoney(s) - ns.getServerMoneyAvailable(s), 1));
 
-		victim.action = neededAction(victim.hostname);
-		switch (victim.action) {
-			case "weaken": victim.vthreads = weakenThreads(victim.hostname); break;
-			case "grow": victim.vthreads = growThresds(victim.hostname); break;
-			default: victim.vthreads = hackThreads(victim.hostname); break;
+		target.action = neededAction(target.hostname);
+		switch (target.action) {
+			case "weaken": target.vthreads = weakenThreads(target.hostname); break;
+			case "grow": target.vthreads = growThresds(target.hostname); break;
+			default: target.vthreads = hackThreads(target.hostname); break;
 		}
 	}
 
-	function logMessagesFromPort1() {
+	function logMessagesFromPort(port) {
 		let info;
 		do {
-			info = ns.readPort(1);
+			info = ns.readPort(port);
 			if (info != 'NULL PORT DATA')
 				ns.print(`SUCCESS ${info}`);
 		} while (info != 'NULL PORT DATA')
