@@ -38,7 +38,7 @@ export async function main(ns) {
 		targets = targets.filter(s => !busy.includes(s.hostname));
 
 		workers = workers.sort((a, b) => freeRam(b.hostname) - freeRam(a.hostname));
-		targets = targets.sort((a, b) => ns.getServerMaxMoney(a.hostname) - ns.getServerMaxMoney(b.hostname));
+		targets = targets.sort((a, b) => ns.getServerMoneyAvailable(a.hostname) - ns.getServerMoneyAvailable(b.hostname));
 
 		ns.print(`${busy.length} busy now: ${busy}`);
 		ns.print(`${targets.length} targets: ${targets.map(s => s.hostname)}`);
