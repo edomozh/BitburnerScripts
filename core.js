@@ -3,7 +3,7 @@ export async function main(ns) {
 	if (ns.args.includes("clean")) cleanServers(ns);
 	if (ns.args.includes("root")) rootServers(ns);
 	if (ns.args.includes("infect")) await infect(ns, "v.js");
-	if (ns.args.includes("backdoor")) backdoor(ns);
+	if (ns.args.includes("backdoor")) await backdoor(ns);
 	if (ns.args.includes("buyall")) buyPrograms(ns);
 }
 

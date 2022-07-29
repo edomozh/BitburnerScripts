@@ -30,7 +30,7 @@ export async function main(ns) {
 
 		let busy = scripts.map(p => ns.getRunningScript(p).args[0]);
 
-		let targets = servers.filter(s => s.hasAdminRights && !!s.moneyMax && !s.purchasedByPlayer);
+		let targets = servers.filter(s => s.hasAdminRights && !!s.moneyMax && !s.purchasedByPlayer && s.moneyAvailable > 0);
 
 		let workers = servers.filter(s => s.hasAdminRights && freeRam(s.hostname) > ns.getScriptRam(scriptName));
 
@@ -52,14 +52,15 @@ export async function main(ns) {
 				let target = targets.pop();
 				if (target) {
 					calcNeededAction(target);
-					let threads = Math.min(worker.resource, target.capacity);
+					let threads = Math.trunc(Math.min(worker.resource, target.capacity) / worker.cpuCores);
 					worker.resource -= threads;
 					ns.print(`INFO work on ${worker.hostname} with ${threads} threads to ${target.action} ${target.hostname} ${fullness(target.hostname)}%`);
 					let pid = ns.exec(scriptName, worker.hostname, threads, target.hostname, target.action);
 					scripts.push(pid);
 				} else {
-					ns.print(`INFO work on ${worker.hostname} with ${worker.resource} threads to grow ${poor.hostname} ${fullness(poor.hostname)}%`);
-					ns.exec(scriptName, worker.hostname, worker.resource, poor.hostname, "grow");
+					let action = ["grow", "weaken", "weaken"][Math.floor(Math.random() * 3)];
+					ns.print(`INFO work on ${worker.hostname} with ${worker.resource} threads to ${action} ${poor.hostname} ${fullness(poor.hostname)}%`);
+					ns.exec(scriptName, worker.hostname, worker.resource, poor.hostname, action);
 					worker.resource = 0;
 				}
 
