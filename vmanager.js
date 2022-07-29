@@ -75,7 +75,7 @@ export async function main(ns) {
 		let tooPoor = (s) => ns.getServerMoneyAvailable(s) < ns.getServerMaxMoney(s) * poorThash;
 		let neededAction = (s) => tooAnxious(s) ? "weaken" : tooPoor(s) ? "grow" : "hack";
 
-		let hackThreads = (s) => Math.ceil(Math.trunc(ns.getServerMaxMoney(s) / ns.hackAnalyze(s) / 2));
+		let hackThreads = (s) => Math.ceil(Math.trunc(ns.getServerMoneyAvailable(s) / ns.hackAnalyze(s) / 2));
 		let weakenThreads = (s) => Math.ceil((ns.getServerSecurityLevel(s) - ns.getServerMinSecurityLevel(s)) / ns.weakenAnalyze(1));
 		let growThresds = (s) => Math.ceil(ns.growthAnalyze(s, ns.getServerMaxMoney(s) - ns.getServerMoneyAvailable(s)));
 
