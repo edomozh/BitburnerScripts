@@ -7,6 +7,7 @@ export async function main(ns) {
 	ns.clearLog();
 
 	let scriptName = "v.js";
+	let poorThash = ns.args[0] / 100 || 0.9;
 
 	let fullness = (s) => Math.trunc((ns.getServerMoneyAvailable(s) / ns.getServerMaxMoney(s)) * 100);
 	let freeRam = (s) => ns.getServerMaxRam(s) - ns.getServerUsedRam(s) - (s == "home" ? 20 : 0);
@@ -71,12 +72,13 @@ export async function main(ns) {
 
 	function calcNeededAction(target) {
 		let tooAnxious = (s) => ns.getServerSecurityLevel(s) > ns.getServerMinSecurityLevel(s) + 5;
-		let tooPoor = (s) => ns.getServerMoneyAvailable(s) < ns.getServerMaxMoney(s) * 0.9;
+		let tooPoor = (s) => ns.getServerMoneyAvailable(s) < ns.getServerMaxMoney(s) * poorThash;
 		let neededAction = (s) => tooAnxious(s) ? "weaken" : tooPoor(s) ? "grow" : "hack";
 
 		let hackThreads = (s) => Math.ceil(Math.trunc(ns.getServerMaxMoney(s) / ns.hackAnalyze(s) / 2));
-		let weakenThreads = (s) => Math.ceil((ns.getServerSecurityLevel(s) - ns.getServerMinSecurityLevel(s)) / ns.weakenAnalyze(1, 1));
-		let growThresds = (s) => Math.ceil(ns.growthAnalyze(s, ns.getServerMaxMoney(s) - ns.getServerMoneyAvailable(s), 1));
+		let weakenThreads = (s) => Math.ceil((ns.getServerSecurityLevel(s) - ns.getServerMinSecurityLevel(s)) / ns.weakenAnalyze(1));
+		let growThresds = (s) => Math.ceil(ns.growthAnalyze(s, ns.getServerMaxMoney(s) - ns.getServerMoneyAvailable(s)));
+
 
 		target.action = neededAction(target.hostname);
 		switch (target.action) {
