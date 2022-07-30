@@ -59,7 +59,7 @@ export async function main(ns) {
 					scripts.push(pid)
 				} else {
 					let action = ["grow", "weaken", "weaken"][Math.floor(Math.random() * 3)]
-					ns.print(`INFO ${worker.resource} ${worker.hostname}  ${target.action} ${target.hostname} ${fullness(target.hostname)}%`)
+					ns.print(`INFO ${worker.resource} ${worker.hostname} ${action} ${poor.hostname} ${fullness(poor.hostname)}%`)
 					ns.exec(scriptName, worker.hostname, worker.resource, poor.hostname, action)
 					worker.resource = 0
 				}

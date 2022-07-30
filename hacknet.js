@@ -10,7 +10,7 @@ export async function main(ns) {
         if (ns.hacknet.getPurchaseNodeCost() < myMoney()) 
             ns.hacknet.purchaseNode()
         
-        for (var i = 0 i < ns.hacknet.numNodes() i++) {
+        for (var i = 0; i < ns.hacknet.numNodes(); i++) {
             var mod = ns.hacknet.getNodeStats(i).level % 10
             if (ns.hacknet.getLevelUpgradeCost(i, 10 - mod) < myMoney()) 
                 ns.hacknet.upgradeLevel(i, 10 - mod)
