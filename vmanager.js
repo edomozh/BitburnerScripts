@@ -8,6 +8,7 @@ export async function main(ns) {
 
 	let scriptName = 'v.js'
 	let poorThash = ns.args[0] / 100 || 0.9
+	let start = new Date().getHours() + ':' + new Date().getMinutes()
 
 	let fullness = (s) => Math.trunc((ns.getServerMoneyAvailable(s) / ns.getServerMaxMoney(s)) * 100)
 	let freeRam = (s) => ns.getServerMaxRam(s) - ns.getServerUsedRam(s) - (s == 'home' ? 20 : 0)
@@ -19,6 +20,8 @@ export async function main(ns) {
 
 	while (true) {
 		ns.clearLog()
+
+		log('w', start)
 
 		rootServers(ns)
 
@@ -57,7 +60,7 @@ export async function main(ns) {
 				if (target) {
 					remember = true
 					calcNeededAction(target)
-					threads = Math.trunc(Math.min(worker.resource, target.capacity) / worker.cpuCores)
+					threads = Math.ceil(Math.min(worker.resource, target.capacity) / worker.cpuCores)
 					busy.push(target)
 				} else {
 					threads = worker.resource
@@ -66,10 +69,10 @@ export async function main(ns) {
 				}
 
 				worker.resource -= threads
+				log('c', `${threads} ${worker.hostname} ${target.action} ${target.hostname} ${fullness(target.hostname)}% ${getHackTime(target.hostname)}`)
 				let pid = ns.exec(scriptName, worker.hostname, threads, target.hostname, target.action)
 				stats[target.action] += threads
 				if (remember) scripts.push(pid)
-				log('c', `${threads} ${worker.hostname} ${target.action} ${target.hostname} ${fullness(target.hostname)}% ${getHackTime(target.hostname)}`)
 				await ns.sleep(100)
 			}
 		}
@@ -101,7 +104,7 @@ export async function main(ns) {
 			info = ns.readPort(port)
 			if (info != 'NULL PORT DATA') {
 				log('s', info)
-				stats.stolen += Number(info.match(re)[0].replace(',', ''))
+				stats.stolen += Number(info.match(re)[0].replaceAll(',', ''))
 			}
 		} while (info != 'NULL PORT DATA')
 	}

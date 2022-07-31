@@ -8,14 +8,20 @@ export async function main(ns) {
 }
 
 export function moneyToString(num) {
+	if (!num) return num;
+
 	const lookup = [
-		{ v: 1, s: '' },
-		{ v: 1e3, s: 'k' }, { v: 1e6, s: 'm' }, { v: 1e9, s: 'g' },
-		{ v: 1e12, s: 't' }, { v: 1e15, s: 'p' }, { v: 1e18, s: 'e' }
+		{ v: 1, s: '', d: '' },
+		{ v: 1e3, s: 'k', d: 'kilo' },
+		{ v: 1e6, s: 'm', d: 'mega' },
+		{ v: 1e9, s: 'g', d: 'giga' },
+		{ v: 1e12, s: 't', d: 'tera' },
+		{ v: 1e15, s: 'p', d: 'peta' },
+		{ v: 1e18, s: 'e', d: 'exa' }
 	]
-	const rx = /\.0+$|(\.[0-9]*[1-9])0+$/
-	var item = lookup.slice().reverse().find(i => num >= i.v)
-	return item ? (num / item.v).toFixed().replace(rx, '$1') + item.s : '0'
+
+	var item = lookup.reverse().find(i => num >= i.v)
+	return (num / item.v).toFixed(2) + item.s
 }
 
 /** @param {NS} ns */
