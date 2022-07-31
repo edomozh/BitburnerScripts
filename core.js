@@ -11,13 +11,12 @@ export function moneyToString(num) {
 	if (!num) return num;
 
 	const lookup = [
-		{ v: 1, s: '', d: '' },
-		{ v: 1e3, s: 'k', d: 'kilo' },
-		{ v: 1e6, s: 'm', d: 'mega' },
-		{ v: 1e9, s: 'g', d: 'giga' },
-		{ v: 1e12, s: 't', d: 'tera' },
-		{ v: 1e15, s: 'p', d: 'peta' },
-		{ v: 1e18, s: 'e', d: 'exa' }
+		{ v: 1, s: '' },
+		{ v: 1e3, s: 'k' },
+		{ v: 1e6, s: 'm' },
+		{ v: 1e9, s: 'b' },
+		{ v: 1e12, s: 't' },
+		{ v: 1e15, s: 'q' }
 	]
 
 	var item = lookup.reverse().find(i => num >= i.v)
