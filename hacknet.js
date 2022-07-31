@@ -1,8 +1,8 @@
 /** @param {NS} ns **/
 export async function main(ns) {
-    ns.disableLog("ALL")
+    ns.disableLog('ALL')
 
-    let myMoney = () => ns.getServerMoneyAvailable("home")
+    let myMoney = () => ns.getServerMoneyAvailable('home')
 
     while (true) {
         await ns.sleep(1000)

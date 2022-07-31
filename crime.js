@@ -5,9 +5,9 @@ export async function main(ns) {
 
     let profit = (c) => ns.singularity.getCrimeStats(c).money
     
-    let crimes = ["shoplift", "rob a store", "mug someone", "larceny",
-        "deal drugs", "forge corporate bonds", "traffick illegal arms",
-        "homicide", "grand theft auto", "kidnap", "assassination", "heist"]
+    let crimes = ['shoplift', 'rob a store', 'mug someone', 'larceny',
+        'deal drugs', 'forge corporate bonds', 'traffick illegal arms',
+        'homicide', 'grand theft auto', 'kidnap', 'assassination', 'heist']
         .sort((a, b) => profit(b) - profit(a))
 
     let trashhold = 0.9
@@ -19,7 +19,7 @@ export async function main(ns) {
 
         for (const crime of crimes) {
             if (ns.getCrimeChance(crime) >= trashhold) {
-                ns.print(`${crime} will bring : ${ns.singularity.getCrimeStats(crime).money.toLocaleString("en-US")}$`)
+                ns.print(`${crime} will bring : ${ns.singularity.getCrimeStats(crime).money.toLocaleString('en-US')}$`)
                 await ns.sleep(ns.commitCrime(crime))
                 break
             }

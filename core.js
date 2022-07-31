@@ -1,10 +1,21 @@
 /** @param {NS} ns **/
 export async function main(ns) {
-	if (ns.args.includes("clean")) cleanServers(ns)
-	if (ns.args.includes("root")) rootServers(ns)
-	if (ns.args.includes("infect")) await infect(ns, "v.js")
-	if (ns.args.includes("backdoor")) await backdoor(ns)
-	if (ns.args.includes("buyall")) buyPrograms(ns)
+	if (ns.args.includes('clean')) cleanServers(ns)
+	if (ns.args.includes('root')) rootServers(ns)
+	if (ns.args.includes('infect')) await infect(ns, 'v.js')
+	if (ns.args.includes('backdoor')) await backdoor(ns)
+	if (ns.args.includes('buyall')) buyPrograms(ns)
+}
+
+export function moneyToString(num) {
+	const lookup = [
+		{ v: 1, s: '' },
+		{ v: 1e3, s: 'k' }, { v: 1e6, s: 'm' }, { v: 1e9, s: 'g' },
+		{ v: 1e12, s: 't' }, { v: 1e15, s: 'p' }, { v: 1e18, s: 'e' }
+	]
+	const rx = /\.0+$|(\.[0-9]*[1-9])0+$/
+	var item = lookup.slice().reverse().find(i => num >= i.v)
+	return item ? (num / item.v).toFixed().replace(rx, '$1') + item.s : '0'
 }
 
 /** @param {NS} ns */
@@ -19,14 +30,14 @@ export async function backdoor(ns) {
 
 	if (!way) return
 
-	ns.tprint(`INFO\n${way.path.join("  ")}`)
+	ns.tprint(`INFO\n${way.path.join('  ')}`)
 
 	for (let s of way.path)
 		ns.singularity.connect(s)
 
 	await ns.singularity.installBackdoor(way.path.pop())
 
-	ns.singularity.connect("home")
+	ns.singularity.connect('home')
 }
 
 /**
@@ -47,7 +58,7 @@ export function cleanServers(ns) {
 	}
 
 	var servers = getServerNames(ns)
-		.filter(s => s != "home")
+		.filter(s => s != 'home')
 		.filter(ns.hasRootAccess)
 
 	servers.forEach(ns.killall)
@@ -61,7 +72,7 @@ export function cleanServers(ns) {
 export function getServers(ns) {
 	let result = []
 
-	fill("home", null, new Array())
+	fill('home', null, new Array())
 
 	return result
 
@@ -96,27 +107,27 @@ export function rootServers(ns) {
 
 		if (ns.getServerRequiredHackingLevel(s) > ns.getHackingLevel()) return
 
-		if (ns.fileExists("BruteSSH.exe")) {
+		if (ns.fileExists('BruteSSH.exe')) {
 			ns.brutessh(s)
 			oports++
 		}
 
-		if (ns.fileExists("HTTPWorm.exe")) {
+		if (ns.fileExists('HTTPWorm.exe')) {
 			ns.httpworm(s)
 			oports++
 		}
 
-		if (ns.fileExists("FTPCrack.exe")) {
+		if (ns.fileExists('FTPCrack.exe')) {
 			ns.ftpcrack(s)
 			oports++
 		}
 
-		if (ns.fileExists("SQLInject.exe")) {
+		if (ns.fileExists('SQLInject.exe')) {
 			ns.sqlinject(s)
 			oports++
 		}
 
-		if (ns.fileExists("relaySMTP.exe")) {
+		if (ns.fileExists('relaySMTP.exe')) {
 			ns.relaysmtp(s)
 			oports++
 		}
@@ -131,7 +142,7 @@ export function rootServers(ns) {
 export async function infect(ns, file) {
 	let servers = getServerNames(ns)
 		.filter(ns.hasRootAccess)
-		.filter(s => s != "home")
+		.filter(s => s != 'home')
 
 	for (let server of servers)
 		await ns.scp(file, server)
@@ -141,9 +152,9 @@ export async function infect(ns, file) {
 export async function buyPrograms(ns) {
 	ns.tail()
 
-	let programs = ["ServerProfiler.exe", "DeepscanV2.exe", "HTTPWorm.exe",
-		"SQLInject.exe", "Formulas.exe", "FTPCrack.exe", "BruteSSH.exe",
-		"relaySMTP.exe", "DeepscanV1.exe", "AutoLink.exe"]
+	let programs = ['ServerProfiler.exe', 'DeepscanV2.exe', 'HTTPWorm.exe',
+		'SQLInject.exe', 'Formulas.exe', 'FTPCrack.exe', 'BruteSSH.exe',
+		'relaySMTP.exe', 'DeepscanV1.exe', 'AutoLink.exe']
 
 	ns.purchaseTor()
 

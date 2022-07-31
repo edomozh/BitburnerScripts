@@ -1,7 +1,7 @@
 /** @param {NS} ns */
 export async function main(ns) {
 	ns.tail()
-	ns.disableLog("ALL")
+	ns.disableLog('ALL')
 	ns.clearLog()
 
 	let maxservers = ns.args[0] || 10
