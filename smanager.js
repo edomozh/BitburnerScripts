@@ -54,6 +54,6 @@ export async function main(ns) {
 		if (count() < maxservers && money() > scost(ram))
 			await purchase(Math.min(ram, maxram))
 
-		await ns.sleep(10000)
+		await ns.sleep(60000)
 	}
 }
