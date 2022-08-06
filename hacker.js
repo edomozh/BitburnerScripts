@@ -1,4 +1,4 @@
-import { getServers, rootServers, infect, numToString } from 'core.js'
+import { getServers, rootServers, infect, numToString, log } from 'core.js'
 import { settings } from 'settings.js'
 
 /** @param {NS} ns */
@@ -120,16 +120,5 @@ export async function main(ns) {
 		var mins = t % 60
 
 		return `${mins}m ${secs}s`
-	}
-
-	function log(l, msg) {
-
-		switch (l) {
-			case 'e': if (settings().log.error) ns.print(`ERROR ${msg}`); break
-			case 'w': if (settings().log.warning) ns.print(`WARNING ${msg}`); break
-			case 'i': if (settings().log.infolog) ns.print(`INFO ${msg}`); break
-			case 's': if (settings().log.success) ns.print(`SUCCESS ${msg}`); break
-			default: if (settings().log.common) ns.print(`${msg}`); break
-		}
 	}
 }

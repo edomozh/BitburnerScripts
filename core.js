@@ -9,6 +9,16 @@ export async function main(ns) {
 	if (ns.args.includes('buyall')) buyPrograms(ns)
 }
 
+export function log(l, msg) {
+	switch (l) {
+		case 'e': if (settings().log.error) ns.print(`ERROR ${msg}`); break
+		case 'w': if (settings().log.warning) ns.print(`WARNING ${msg}`); break
+		case 'i': if (settings().log.infolog) ns.print(`INFO ${msg}`); break
+		case 's': if (settings().log.success) ns.print(`SUCCESS ${msg}`); break
+		default: if (settings().log.common) ns.print(`${msg}`); break
+	}
+}
+
 export function numToString(num) {
 	if (!num) return num;
 
@@ -59,17 +69,19 @@ export function getServerNames(ns) {
 
 /** @param {NS} ns **/
 export function cleanServers(ns) {
+	ns.tail()
+
 	function clear(server) {
 		var ls = Array.from(ns.ls(server))
-		ls.forEach((v) => ns.rm(v, server))
+		ls.forEach(f => ns.rm(f, server))
 	}
 
 	var servers = getServerNames(ns)
-		.filter(s => s != 'home')
 		.filter(ns.hasRootAccess)
 
-	servers.forEach(ns.killall)
-	servers.forEach(clear)
+		servers.forEach(clear)
+		servers.forEach(ns.killall)
+		servers.forEach(clear)
 }
 
 /** 

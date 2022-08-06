@@ -1,4 +1,4 @@
-export async function settings() {
+export function settings() {
     return {
         log: {
             error: true,
