@@ -1,4 +1,4 @@
-import { moneyToString } from 'core.js'
+import { numToString } from 'core.js'
 
 /** @param {NS} ns */
 export async function main(ns) {
@@ -30,7 +30,7 @@ export async function main(ns) {
 		if (ns.args.includes('admin')) info.push(node.hasAdminRights)
 		if (ns.args.includes('backdoor')) info.push(node.backdoorInstalled)
 		if (ns.args.includes('level')) info.push(node.requiredHackingSkill)
-		if (ns.args.includes('maxmoney')) info.push(moneyToString(node.moneyMax))
+		if (ns.args.includes('maxmoney')) info.push(numToString(node.moneyMax))
 
 		if (ns.args.includes('available') && !node.hasAdminRights) info = []
 

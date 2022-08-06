@@ -1,13 +1,15 @@
+import { settings } from 'settings.js'
+
 /** @param {NS} ns **/
 export async function main(ns) {
 	if (ns.args.includes('clean')) cleanServers(ns)
 	if (ns.args.includes('root')) rootServers(ns)
-	if (ns.args.includes('infect')) await infect(ns, 'v.js')
+	if (ns.args.includes('infect')) await infect(ns, settings().hackfile)
 	if (ns.args.includes('backdoor')) await backdoor(ns)
 	if (ns.args.includes('buyall')) buyPrograms(ns)
 }
 
-export function moneyToString(num) {
+export function numToString(num) {
 	if (!num) return num;
 
 	const lookup = [
@@ -20,7 +22,7 @@ export function moneyToString(num) {
 	]
 
 	var item = lookup.reverse().find(i => num >= i.v)
-	return (num / item.v).toFixed(2) + item.s
+	return (num / item.v).toFixed(3) + item.s
 }
 
 /** @param {NS} ns */

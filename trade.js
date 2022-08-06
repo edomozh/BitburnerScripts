@@ -17,9 +17,9 @@ export async function main(ns) {
 	}
 
 	while (true) {
-		await ns.sleep(6000)
+		await ns.sleep(6e3)
 		
-		if (ns.getServerMoneyAvailable('home') < 100000000) continue
+		if (ns.getServerMoneyAvailable('home') < 100e6) continue
 		 
 		for (const stock of stockSymbols) {
 			if (portfolio.findIndex(obj => obj.sym === stock) !== -1) {

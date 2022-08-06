@@ -1,4 +1,5 @@
-import { getServers, rootServers, infect, moneyToString } from 'core.js'
+import { getServers, rootServers, infect, numToString } from 'core.js'
+import { settings } from 'settings.js'
 
 /** @param {NS} ns */
 export async function main(ns) {
@@ -6,7 +7,7 @@ export async function main(ns) {
 	ns.disableLog('ALL')
 	ns.clearLog()
 
-	let scriptName = 'v.js'
+	let scriptName = settings().hackfile
 	let poorThash = ns.args[0] / 100 || 0.9
 	let start = new Date().getHours() + ':' + new Date().getMinutes()
 
@@ -47,7 +48,7 @@ export async function main(ns) {
 		log('i', `${hacking.length} hacking: ${hacking.map(s => s.args[0])}`)
 
 		log('w', `busy ${busy.length}, hacking ${hacking.length}, targets ${targets.length}, workers ${workers.length}`)
-		log('w', `grow ${stats.grow}, hack ${stats.hack}, weaken ${stats.weaken}, stolen ${moneyToString(stats.stolen)}`)
+		log('w', `grow ${numToString(stats.grow)}, hack ${numToString(stats.hack)}, weaken ${numToString(stats.weaken)}, stolen ${numToString(stats.stolen)}`)
 
 		for (let worker of workers) {
 			worker.resource = resource(worker.hostname)
@@ -63,7 +64,7 @@ export async function main(ns) {
 					threads = Math.ceil(Math.min(worker.resource, target.capacity) / worker.cpuCores)
 					busy.push(target)
 				} else {
-					threads = worker.resource
+					threads = Math.ceil(Math.min(worker.resource, 100))
 					target = busy[Math.floor(Math.random() * busy.length)]
 					target.action = ['grow', 'weaken', 'weaken'][Math.floor(Math.random() * 3)]
 				}
@@ -123,18 +124,12 @@ export async function main(ns) {
 
 	function log(l, msg) {
 
-		const errorlog = true;
-		const warninglog = true;
-		const infolog = true;
-		const successlog = true;
-		const commonlog = false;
-
 		switch (l) {
-			case 'e': if (errorlog) ns.print(`ERROR ${msg}`); break
-			case 'w': if (warninglog) ns.print(`WARNING ${msg}`); break
-			case 'i': if (infolog) ns.print(`INFO ${msg}`); break
-			case 's': if (successlog) ns.print(`SUCCESS ${msg}`); break
-			default: if (commonlog) ns.print(`${msg}`); break
+			case 'e': if (settings().log.error) ns.print(`ERROR ${msg}`); break
+			case 'w': if (settings().log.warning) ns.print(`WARNING ${msg}`); break
+			case 'i': if (settings().log.infolog) ns.print(`INFO ${msg}`); break
+			case 's': if (settings().log.success) ns.print(`SUCCESS ${msg}`); break
+			default: if (settings().log.common) ns.print(`${msg}`); break
 		}
 	}
 }
