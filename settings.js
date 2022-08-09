@@ -3,7 +3,8 @@ export function settings() {
         log: {
             error: true,
             warning: true,
-            info: false, success: false,
+            info: true, 
+            success: true,
             common: false
         },
         hackfile: "actor.js"

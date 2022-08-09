@@ -8,7 +8,7 @@ export async function main(ns) {
 	ns.clearLog()
 
 	let scriptName = settings().hackfile
-	let poorThash = ns.args[0] / 100 || 0.9
+	let poorTrash = ns.args[0] / 100 || 0.9
 	let start = new Date().getHours() + ':' + new Date().getMinutes()
 
 	let fullness = (s) => Math.trunc((ns.getServerMoneyAvailable(s) / ns.getServerMaxMoney(s)) * 100)
@@ -22,7 +22,7 @@ export async function main(ns) {
 	while (true) {
 		ns.clearLog()
 
-		log('w', start)
+		log(ns, 'w', start)
 
 		rootServers(ns)
 
@@ -40,15 +40,15 @@ export async function main(ns) {
 		workers = workers.sort((a, b) => freeRam(b.hostname) - freeRam(a.hostname))
 		targets = targets.sort((a, b) => ns.getServerMoneyAvailable(a.hostname) - ns.getServerMoneyAvailable(b.hostname))
 
-		log('i', `${busy.length} busy: ${busy.map(s => s.hostname)}`)
-		log('i', `${targets.length} targets: ${targets.map(s => s.hostname)}`)
-		log('i', `${workers.length} workers: ${workers.map(s => s.hostname)}`)
+		log(ns, 'i', `${busy.length} busy: ${busy.map(s => s.hostname)}`)
+		log(ns, 'i', `${targets.length} targets: ${targets.map(s => s.hostname)}`)
+		log(ns, 'i', `${workers.length} workers: ${workers.map(s => s.hostname)}`)
 
 		let hacking = scripts.map(p => ns.getRunningScript(p)).filter(s => s.args[1] == 'hack')
-		log('i', `${hacking.length} hacking: ${hacking.map(s => s.args[0])}`)
+		log(ns, 'i', `${hacking.length} hacking: ${hacking.map(s => s.args[0])}`)
 
-		log('w', `busy ${busy.length}, hacking ${hacking.length}, targets ${targets.length}, workers ${workers.length}`)
-		log('w', `grow ${numToString(stats.grow)}, hack ${numToString(stats.hack)}, weaken ${numToString(stats.weaken)}, stolen ${numToString(stats.stolen)}`)
+		log(ns, 'w', `busy ${busy.length}, hacking ${hacking.length}, targets ${targets.length}, workers ${workers.length}`)
+		log(ns, 'w', `grow ${numToString(stats.grow)}, hack ${numToString(stats.hack)}, weaken ${numToString(stats.weaken)}, stolen ${numToString(stats.stolen)}`)
 
 		for (let worker of workers) {
 			worker.resource = resource(worker.hostname)
@@ -63,14 +63,17 @@ export async function main(ns) {
 					calcNeededAction(target)
 					threads = Math.ceil(Math.min(worker.resource, target.capacity) / worker.cpuCores)
 					busy.push(target)
-				} else {
-					threads = Math.ceil(Math.min(worker.resource, 100))
+				} else if (ns.args.includes("allres")) {
+					threads = Math.ceil(Math.min(worker.resource, 1e6))
 					target = busy[Math.floor(Math.random() * busy.length)]
-					target.action = ['grow', 'weaken', 'weaken'][Math.floor(Math.random() * 3)]
+					target.action = ['grow', 'weaken'][Math.floor(Math.random() * 2)]
+				} else {
+					worker.resource = 0;
+					continue;
 				}
 
 				worker.resource -= threads
-				log('c', `${threads} ${worker.hostname} ${target.action} ${target.hostname} ${fullness(target.hostname)}% ${getHackTime(target.hostname)}`)
+				log(ns, 'c', `${threads} ${worker.hostname} ${target.action} ${target.hostname} ${fullness(target.hostname)}% ${msToSec(target.hostname)}`)
 				let pid = ns.exec(scriptName, worker.hostname, threads, target.hostname, target.action)
 				stats[target.action] += threads
 				if (remember) scripts.push(pid)
@@ -83,10 +86,10 @@ export async function main(ns) {
 
 	function calcNeededAction(target) {
 		let tooAnxious = (s) => ns.getServerSecurityLevel(s) > ns.getServerMinSecurityLevel(s) + 5
-		let tooPoor = (s) => ns.getServerMoneyAvailable(s) <= ns.getServerMaxMoney(s) * poorThash
+		let tooPoor = (s) => ns.getServerMoneyAvailable(s) <= ns.getServerMaxMoney(s) * poorTrash
 		let neededAction = (s) => tooAnxious(s) ? 'weaken' : tooPoor(s) ? 'grow' : 'hack'
 
-		let hackThreads = (s) => Math.ceil(ns.getServerMoneyAvailable(s) / (ns.getServerMoneyAvailable(s) * ns.hackAnalyze(s)) * 0.5)
+		let hackThreads = (s) => Math.ceil(ns.hackAnalyzeThreads(s, ns.getServerMoneyAvailable(s) * 0.8))
 		let weakenThreads = (s) => Math.ceil((ns.getServerSecurityLevel(s) - ns.getServerMinSecurityLevel(s)) / ns.weakenAnalyze(1))
 		let growThreads = (s) => Math.ceil(ns.growthAnalyze(s, ns.getServerMaxMoney(s) / ns.getServerMoneyAvailable(s)))
 
@@ -104,21 +107,19 @@ export async function main(ns) {
 		do {
 			info = ns.readPort(port)
 			if (info != 'NULL PORT DATA') {
-				log('s', info)
+				log(ns, 's', info)
 				stats.stolen += Number(info.match(re)[0].replaceAll(',', ''))
 			}
 		} while (info != 'NULL PORT DATA')
 	}
 
-	function getHackTime(s) {
+	function msToSec(s) {
 		let t = ns.getHackTime(s);
 		t = Math.trunc(t)
 		var ms = t % 1000
 		t = (t - ms) / 1000
 		var secs = t % 60
-		t = (t - secs) / 60
-		var mins = t % 60
 
-		return `${mins}m ${secs}s`
+		return `${secs} sec`
 	}
 }

@@ -1,5 +1,11 @@
+import { log } from 'core.js'
+
 /** @param {NS} ns */
 export async function main(ns) {
+	ns.disableLog("ALL")
+	ns.clearLog()
+	ns.tail()
+
 	let stockSymbols = ns.stock.getSymbols()
 	let portfolio = []
 
@@ -18,9 +24,9 @@ export async function main(ns) {
 
 	while (true) {
 		await ns.sleep(6e3)
-		
+
 		if (ns.getServerMoneyAvailable('home') < 100e6) continue
-		 
+
 		for (const stock of stockSymbols) {
 			if (portfolio.findIndex(obj => obj.sym === stock) !== -1) {
 				let i = portfolio.findIndex(obj => obj.sym === stock)
@@ -44,6 +50,7 @@ export async function main(ns) {
 
 		if (ns.stock.getVolatility(stock) <= 0.05) {
 			ns.stock.buy(stock, shares)
+			log(ns, "w", `buy ${shares} ${stock}`)
 			portfolio.push({ sym: stock, value: stockPrice, shares: shares })
 		}
 	}
@@ -55,6 +62,7 @@ export async function main(ns) {
 			let i = portfolio.findIndex(obj => obj.sym === stock)
 			portfolio.splice(i, 1)
 			ns.stock.sell(stock, position[0])
+			log(ns, "w", `sell ${stock}`)
 		}
 	}
 

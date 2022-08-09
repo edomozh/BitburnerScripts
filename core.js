@@ -9,7 +9,7 @@ export async function main(ns) {
 	if (ns.args.includes('buyall')) buyPrograms(ns)
 }
 
-export function log(l, msg) {
+export function log(ns, l, msg) {
 	switch (l) {
 		case 'e': if (settings().log.error) ns.print(`ERROR ${msg}`); break
 		case 'w': if (settings().log.warning) ns.print(`WARNING ${msg}`); break
@@ -69,19 +69,33 @@ export function getServerNames(ns) {
 
 /** @param {NS} ns **/
 export function cleanServers(ns) {
+
+	ns.clearLog()
 	ns.tail()
+
+	let settings = "settings.js"
+	let core = "core.js"
 
 	function clear(server) {
 		var ls = Array.from(ns.ls(server))
-		ls.forEach(f => ns.rm(f, server))
+		ls
+			.filter(f => f != core && f != settings)
+			.forEach(f => ns.rm(f, server))
+	}
+
+	function kill(server) {
+		var scr = Array.from(ns.ps(server))
+			.filter(s => s.filename != core)
+			.map(s => s.pid)
+
+		scr.forEach(f => ns.kill(f, server))
 	}
 
 	var servers = getServerNames(ns)
 		.filter(ns.hasRootAccess)
 
-		servers.forEach(clear)
-		servers.forEach(ns.killall)
-		servers.forEach(clear)
+	servers.forEach(kill)
+	servers.forEach(clear)
 }
 
 /** 
@@ -180,4 +194,44 @@ export async function buyPrograms(ns) {
 	for (const p of programs)
 		ns.purchaseProgram(p)
 
+}
+
+export function getCompanyServer(symbol) {
+	var symbolMap = [
+		["AERO", "AeroCorp", "aerocorp"],
+		["APHE", "Alpha Enterprises", "alpha-ent"],
+		["BLD", "Blade Industries", "blade"],
+		["CLRK", "Clarke Incorporated", "clarkinc"],
+		["CTK", "CompuTek", "comptek"],
+		["CTYS", "Catalyst Ventures", "catalyst"],
+		["DCOMM", "DefComm", "defcomm"],
+		["ECP", "ECorp", "ecorp"],
+		["FLCM", "Fulcrum Technologies", "fulcrumassets"],
+		["FNS", "FoodNStuff", "foodnstuff"],
+		["FSIG", "Four Sigma", "4sigma"],
+		["GPH", "Global Pharmaceuticals", "global-pharm"],
+		["HLS", "Helios Labs", "helios"],
+		["ICRS", "Icarus Microsystems", "icarus"],
+		["JGN", "Joe's Guns", "joesguns"],
+		["KGI", "KuaiGong International", "kuai-gong"],
+		["LXO", "LexoCorp", "lexo-corp"],
+		["MDYN", "Microdyne Technologies", "microdyne"],
+		["MGCP", "MegaCorp", "megacorp"],
+		["NTLK", "NetLink Technologies", "netlink"],
+		["NVMD", "Nova Medical", "nova-med"],
+		["OMGA", "Omega Software", "omega-net"],
+		["OMN", "Omnia Cybersystems", "omnia"],
+		["OMTK", "OmniTek Incorporated", "omnitek"],
+		["RHOC", "Rho Contruction", "rho-construction"],
+		["SGC", "Sigma Cosmetics", "sigma-cosmetics"],
+		["SLRS", "Solaris Space Systems", "solaris"],
+		["STM", "Storm Technologies", "stormtech"],
+		["SYSC", "SysCore Securities", "syscore"],
+		["TITN", "Titan Laboratories", "titan-labs"],
+		["UNV", "Universal Energy", "univ-energy"],
+		["VITA", "VitaLife", "vitalife"],
+		["WDS", "Watchdog Security", ""]
+	];
+
+	return symbolMap.filter(m = m[0] == symbol)[0][2];
 }
