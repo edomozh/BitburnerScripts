@@ -21,7 +21,7 @@ export async function main(ns) {
 		let pos = ns.stock.getPosition(stock)
 		if (pos[0] > 0) {
 			portfolio.push({ sym: stock, value: pos[1], shares: pos[0] })
-			stats.profit -= (pos[1] * pos[0]).toFixed(0)
+			stats.profit -= Number.parseInt(pos[1] * pos[0])
 		}
 	}
 
@@ -48,7 +48,7 @@ export async function main(ns) {
 		stats.portfolio = portfolio.map(s => `${s.sym} ${(s.value * s.shares).toFixed(0)}`)
 		log(ns, "w", `${stringify(stats)}`)
 
-		await ns.sleep(1e3)
+		await ns.sleep(60e3)
 	}
 
 	function buyStock(stock) {
@@ -57,8 +57,8 @@ export async function main(ns) {
 
 		if (ns.stock.getVolatility(stock) <= 0.05) {
 			ns.stock.buy(stock, quantity)
-			log(ns, "c", `buy ${stock} for ${numToString(quantity * price)}`)
-			stats.profit -= price * quantity
+			log(ns, "i", `buy ${stock} for ${numToString(quantity * price)}`)
+			stats.profit -= Number.parseInt(quantity * price)
 			portfolio.push({ sym: stock, value: price, shares: quantity })
 		}
 	}
@@ -70,8 +70,8 @@ export async function main(ns) {
 			let i = portfolio.findIndex(obj => obj.sym === stock)
 			portfolio.splice(i, 1)
 			ns.stock.sell(stock, pos[0])
-			stats.profit += (pos[1] * pos[0]).toFixed(0)
-			log(ns, "c", `sell ${stock} for ${numToString(pos[1] * pos[0])}`)
+			stats.profit += Number.parseInt(pos[1] * pos[0])
+			log(ns, "i", `sell ${stock} for ${numToString(pos[1] * pos[0])}`)
 		}
 	}
 
