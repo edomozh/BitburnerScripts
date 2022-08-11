@@ -46,8 +46,8 @@ export async function main(ns) {
 		log(ns, 'd', `workers ${workers.map(s => s.hostname)}`)
 
 		let hacking = scripts.map(p => ns.getRunningScript(p)).filter(s => s.args[1] == 'hack')
-		log(ns, 'i', `hacking: ${hacking.length}`)
-		log(ns, 'd', `hacking: ${hacking.map(s => s.args[0])}`)
+		log(ns, 'i', `hacking ${hacking.length}`)
+		log(ns, 'd', `hacking ${hacking.map(s => s.args[0])}`)
 
 		log(ns, 'w', `${stringify(stats, null, 2)}`)
 
