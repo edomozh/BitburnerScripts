@@ -16,6 +16,7 @@ export async function main(ns) {
 export function log(ns, l, msg) {
 	switch (l) {
 		case 'e': if (settings().log.error) ns.print(`ERROR ${msg}`); break
+		case 'd': if (settings().log.debug) ns.print(`ERROR ${msg}`); break
 		case 'w': if (settings().log.warning) ns.print(`WARNING ${msg}`); break
 		case 'i': if (settings().log.info) ns.print(`INFO ${msg}`); break
 		case 's': if (settings().log.success) ns.print(`SUCCESS ${msg}`); break

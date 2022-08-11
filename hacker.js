@@ -1,4 +1,4 @@
-import { getServers, rootServers, infect, log, msToSec, stringify ,getDate} from 'core.js'
+import { getServers, rootServers, infect, log, msToSec, stringify, getDate } from 'core.js'
 import { settings } from 'settings.js'
 
 /** @param {NS} ns */
@@ -20,9 +20,6 @@ export async function main(ns) {
 	stats.start = getDate()
 
 	while (true) {
-		ns.clearLog()
-		log(ns, 'w', `${stringify(stats, null, 2)}`)
-
 		rootServers(ns)
 
 		await infect(ns, scriptName)
@@ -39,12 +36,20 @@ export async function main(ns) {
 		workers = workers.sort((a, b) => freeRam(b.hostname) - freeRam(a.hostname))
 		targets = targets.sort((a, b) => ns.getServerMoneyAvailable(a.hostname) - ns.getServerMoneyAvailable(b.hostname))
 
-		log(ns, 'i', `${busy.length} busy: ${busy.map(s => s.hostname)}`)
-		log(ns, 'i', `${targets.length} targets: ${targets.map(s => s.hostname)}`)
-		log(ns, 'i', `${workers.length} workers: ${workers.map(s => s.hostname)}`)
+		log(ns, 'i', `busy ${busy.length}`)
+		log(ns, 'd', `busy ${busy.map(s => s.hostname)}`)
+
+		log(ns, 'i', `targets ${targets.length}`)
+		log(ns, 'd', `targets ${targets.map(s => s.hostname)}`)
+
+		log(ns, 'i', `workers ${workers.length}`)
+		log(ns, 'd', `workers ${workers.map(s => s.hostname)}`)
 
 		let hacking = scripts.map(p => ns.getRunningScript(p)).filter(s => s.args[1] == 'hack')
-		log(ns, 'i', `${hacking.length} hacking: ${hacking.map(s => s.args[0])}`)
+		log(ns, 'i', `hacking: ${hacking.length}`)
+		log(ns, 'd', `hacking: ${hacking.map(s => s.args[0])}`)
+
+		log(ns, 'w', `${stringify(stats, null, 2)}`)
 
 		for (let worker of workers) {
 			worker.resource = resource(worker.hostname)
@@ -77,7 +82,9 @@ export async function main(ns) {
 			}
 		}
 
-		await ns.sleep(5000)
+		await ns.sleep(5e3)
+
+		ns.clearLog()
 	}
 
 	function calcNeededAction(target) {

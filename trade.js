@@ -52,14 +52,14 @@ export async function main(ns) {
 	}
 
 	function buyStock(stock) {
-		let price = ns.stock.getAskPrice(stock)
+		let price = ns.stock.getAskPrice(stock).toFixed(0)
 		let quantity = stockBuyQuantCalc(price, stock)
 
 		if (ns.stock.getVolatility(stock) <= 0.05) {
 			ns.stock.buy(stock, quantity)
 			log(ns, "c", `buy ${stock} for ${numToString(quantity * price)}`)
 			stats.profit -= price * quantity
-			portfolio.push({ sym: stock, value: price.toFixed(0), shares: quantity })
+			portfolio.push({ sym: stock, value: price, shares: quantity })
 		}
 	}
 
@@ -70,7 +70,7 @@ export async function main(ns) {
 			let i = portfolio.findIndex(obj => obj.sym === stock)
 			portfolio.splice(i, 1)
 			ns.stock.sell(stock, pos[0])
-			stats.profit += pos[1] * pos[0]
+			stats.profit += (pos[1] * pos[0]).toFixed(0)
 			log(ns, "c", `sell ${stock} for ${numToString(pos[1] * pos[0])}`)
 		}
 	}
