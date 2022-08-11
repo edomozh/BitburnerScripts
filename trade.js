@@ -1,4 +1,4 @@
-import { log } from 'core.js'
+import { numToString, log, stringify, getDate } from 'core.js'
 
 /** @param {NS} ns */
 export async function main(ns) {
@@ -8,24 +8,27 @@ export async function main(ns) {
 
 	let stockSymbols = ns.stock.getSymbols()
 	let portfolio = []
-
+	let stats = { start: 0, profit: 0 }
 	const BUY_FC_THRESH = 0.65
 	const SELL_FC_THRESH = 0.5
 	const PROFIT_THRESH = 2.5
 	const STOP_LOSS = 0.4
 	const SPEND_RATIO = 0.25
 
+	stats.start = getDate()
+
 	for (const stock of stockSymbols) {
 		let pos = ns.stock.getPosition(stock)
 		if (pos[0] > 0) {
 			portfolio.push({ sym: stock, value: pos[1], shares: pos[0] })
+			stats.profit -= (pos[1] * pos[0]).toFixed(0)
 		}
 	}
 
 	while (true) {
-		await ns.sleep(6e3)
+		ns.clearLog()
 
-		if (ns.getServerMoneyAvailable('home') < 100e6) continue
+		if (ns.getServerMoneyAvailable('home') < 60e3) continue
 
 		for (const stock of stockSymbols) {
 			if (portfolio.findIndex(obj => obj.sym === stock) !== -1) {
@@ -42,27 +45,33 @@ export async function main(ns) {
 			}
 		}
 
+		stats.portfolio = portfolio.map(s => `${s.sym} ${(s.value * s.shares).toFixed(0)}`)
+		log(ns, "w", `${stringify(stats)}`)
+
+		await ns.sleep(1e3)
 	}
 
 	function buyStock(stock) {
-		let stockPrice = ns.stock.getAskPrice(stock)
-		let shares = stockBuyQuantCalc(stockPrice, stock)
+		let price = ns.stock.getAskPrice(stock)
+		let quantity = stockBuyQuantCalc(price, stock)
 
 		if (ns.stock.getVolatility(stock) <= 0.05) {
-			ns.stock.buy(stock, shares)
-			log(ns, "w", `buy ${shares} ${stock}`)
-			portfolio.push({ sym: stock, value: stockPrice, shares: shares })
+			ns.stock.buy(stock, quantity)
+			log(ns, "c", `buy ${stock} for ${numToString(quantity * price)}`)
+			stats.profit -= price * quantity
+			portfolio.push({ sym: stock, value: price.toFixed(0), shares: quantity })
 		}
 	}
 
 	function sellStock(stock) {
-		let position = ns.stock.getPosition(stock)
+		let pos = ns.stock.getPosition(stock)
 		let forecast = ns.stock.getForecast(stock)
 		if (forecast < SELL_FC_THRESH) {
 			let i = portfolio.findIndex(obj => obj.sym === stock)
 			portfolio.splice(i, 1)
-			ns.stock.sell(stock, position[0])
-			log(ns, "w", `sell ${stock}`)
+			ns.stock.sell(stock, pos[0])
+			stats.profit += pos[1] * pos[0]
+			log(ns, "c", `sell ${stock} for ${numToString(pos[1] * pos[0])}`)
 		}
 	}
 

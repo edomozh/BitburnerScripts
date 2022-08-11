@@ -1,4 +1,4 @@
-import { numToString } from 'core.js'
+import { numToString, stringify } from 'core.js'
 
 /** @param {NS} ns */
 export async function main(ns) {
@@ -10,13 +10,7 @@ export async function main(ns) {
 	if (ns.args[0] == 'server')
 		root = ns.getServer(ns.args[1])
 
-	let result = JSON.stringify(root, null, 1)
-		.toString()
-		.replaceAll(/[{}\[\]:,\"]/g, '')
-		.replaceAll(/^\s+$/gm, '')
-		.replaceAll(/\n\n/g, `\n`)
-
-	ns.tprint(`INFO\n${result}\n`)
+	ns.tprint(`INFO\n${stringify(root)}\n`)
 
 	function editinfo(node) {
 		node.servers.forEach(n => editinfo(n))

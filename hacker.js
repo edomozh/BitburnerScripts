@@ -1,4 +1,4 @@
-import { getServers, rootServers, infect, numToString, log } from 'core.js'
+import { getServers, rootServers, infect, log, msToSec, stringify ,getDate} from 'core.js'
 import { settings } from 'settings.js'
 
 /** @param {NS} ns */
@@ -9,7 +9,6 @@ export async function main(ns) {
 
 	let scriptName = settings().hackfile
 	let poorTrash = ns.args[0] / 100 || 0.9
-	let start = new Date().getHours() + ':' + new Date().getMinutes()
 
 	let fullness = (s) => Math.trunc((ns.getServerMoneyAvailable(s) / ns.getServerMaxMoney(s)) * 100)
 	let freeRam = (s) => ns.getServerMaxRam(s) - ns.getServerUsedRam(s) - (s == 'home' ? 20 : 0)
@@ -17,12 +16,12 @@ export async function main(ns) {
 
 	let scripts = []
 
-	let stats = { hack: 0, grow: 0, weaken: 0, stolen: 0 }
+	let stats = { start: 0, hack: 0, grow: 0, weaken: 0, stolen: 0 }
+	stats.start = getDate()
 
 	while (true) {
 		ns.clearLog()
-
-		log(ns, 'w', start)
+		log(ns, 'w', `${stringify(stats, null, 2)}`)
 
 		rootServers(ns)
 
@@ -47,9 +46,6 @@ export async function main(ns) {
 		let hacking = scripts.map(p => ns.getRunningScript(p)).filter(s => s.args[1] == 'hack')
 		log(ns, 'i', `${hacking.length} hacking: ${hacking.map(s => s.args[0])}`)
 
-		log(ns, 'w', `busy ${busy.length}, hacking ${hacking.length}, targets ${targets.length}, workers ${workers.length}`)
-		log(ns, 'w', `grow ${numToString(stats.grow)}, hack ${numToString(stats.hack)}, weaken ${numToString(stats.weaken)}, stolen ${numToString(stats.stolen)}`)
-
 		for (let worker of workers) {
 			worker.resource = resource(worker.hostname)
 
@@ -61,7 +57,7 @@ export async function main(ns) {
 				if (target) {
 					remember = true
 					calcNeededAction(target)
-					threads = Math.ceil(Math.min(worker.resource, target.capacity) / worker.cpuCores)
+					threads = Math.ceil(Math.min(worker.resource, target.capacity))
 					busy.push(target)
 				} else if (ns.args.includes("allres")) {
 					threads = Math.ceil(Math.min(worker.resource, 1e6))
@@ -73,11 +69,11 @@ export async function main(ns) {
 				}
 
 				worker.resource -= threads
-				log(ns, 'c', `${threads} ${worker.hostname} ${target.action} ${target.hostname} ${fullness(target.hostname)}% ${msToSec(target.hostname)}`)
+				log(ns, 'c', `${threads} ${worker.hostname} ${target.action} ${target.hostname} ${fullness(target.hostname)}% ${msToSec(ns.getHackTime(target.hostname))}`)
 				let pid = ns.exec(scriptName, worker.hostname, threads, target.hostname, target.action)
 				stats[target.action] += threads
 				if (remember) scripts.push(pid)
-				await ns.sleep(100)
+				await ns.sleep(10)
 			}
 		}
 
@@ -102,24 +98,13 @@ export async function main(ns) {
 	}
 
 	function logMessagesFromPort(port) {
-		const re = /^[0-9,]+/
 		let info
 		do {
 			info = ns.readPort(port)
 			if (info != 'NULL PORT DATA') {
-				log(ns, 's', info)
-				stats.stolen += Number(info.match(re)[0].replaceAll(',', ''))
+				stats.stolen += Number(info.match(/^[0-9,]+/g)[0])
+				log(ns, 's', stringify(info))
 			}
 		} while (info != 'NULL PORT DATA')
-	}
-
-	function msToSec(s) {
-		let t = ns.getHackTime(s);
-		t = Math.trunc(t)
-		var ms = t % 1000
-		t = (t - ms) / 1000
-		var secs = t % 60
-
-		return `${secs} sec`
 	}
 }

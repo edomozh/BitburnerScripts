@@ -3,7 +3,7 @@ export function settings() {
         log: {
             error: true,
             warning: true,
-            info: true, 
+            info: false, 
             success: true,
             common: false
         },

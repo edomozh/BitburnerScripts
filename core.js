@@ -1,5 +1,9 @@
 import { settings } from 'settings.js'
 
+export function getDate() {
+	return `${new Date().getDate()} ${new Date().toLocaleString('default', { month: 'long' })} ${new Date().getHours()}h ${new Date().getMinutes()}m`
+}
+
 /** @param {NS} ns **/
 export async function main(ns) {
 	if (ns.args.includes('clean')) cleanServers(ns)
@@ -13,10 +17,21 @@ export function log(ns, l, msg) {
 	switch (l) {
 		case 'e': if (settings().log.error) ns.print(`ERROR ${msg}`); break
 		case 'w': if (settings().log.warning) ns.print(`WARNING ${msg}`); break
-		case 'i': if (settings().log.infolog) ns.print(`INFO ${msg}`); break
+		case 'i': if (settings().log.info) ns.print(`INFO ${msg}`); break
 		case 's': if (settings().log.success) ns.print(`SUCCESS ${msg}`); break
 		default: if (settings().log.common) ns.print(`${msg}`); break
 	}
+}
+
+export function stringify(obj) {
+	let result = JSON.stringify(obj, null, 1)
+		.toString()
+		.replaceAll(/[{}\[\]:,\"]/g, '')
+		.replaceAll(/^\s+$/gm, '')
+		.replaceAll(/\n\n/g, `\n`)
+		.replaceAll(/[0-9][0-9][0-9][0-9]+/g, numToString);
+
+	return result;
 }
 
 export function numToString(num) {
@@ -233,5 +248,23 @@ export function getCompanyServer(symbol) {
 		["WDS", "Watchdog Security", ""]
 	];
 
-	return symbolMap.filter(m = m[0] == symbol)[0][2];
+	return symbolMap.filter(m => m[0] == symbol)[0][2];
+}
+
+export function msToSec(s) {
+	let t = s;
+	t = Math.trunc(t)
+	var ms = t % 1000
+
+	t = (t - ms) / 1000
+
+	var secs = t % 60
+
+	t = (t - secs) / 60
+	var mins = t % 60
+
+	t = (t - mins) / 60
+	var hours = t % 60
+
+	return `t (${hours}:${mins}:${secs})`
 }
