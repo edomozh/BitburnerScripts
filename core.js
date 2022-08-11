@@ -47,7 +47,7 @@ export function numToString(num) {
 		{ v: 1e15, s: 'q' }
 	]
 
-	var item = lookup.reverse().find(i => num >= i.v)
+	var item = lookup.reverse().find(i => Math.abs(num) >= i.v)
 	return (num / item.v).toFixed(3) + item.s
 }
 
