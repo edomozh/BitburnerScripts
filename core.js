@@ -30,13 +30,15 @@ export function stringify(obj) {
 		.replaceAll(/[{}\[\]:,\"]/g, '')
 		.replaceAll(/^\s+$/gm, '')
 		.replaceAll(/\n\n/g, `\n`)
-		.replaceAll(/[0-9][0-9][0-9][0-9]+/g, numToString);
+		.replaceAll(/[0-9.][0-9.][0-9.][0-9.]+/g, numToString);
 
 	return result;
 }
 
 export function numToString(num) {
 	if (!num) return num;
+
+	num = Number.parseInt(num)
 
 	const lookup = [
 		{ v: 1, s: '' },
