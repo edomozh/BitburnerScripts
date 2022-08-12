@@ -5,9 +5,9 @@ export async function main(ns) {
 	ns.clearLog()
 	ns.tail()
 
-	let maxEmploees = 60;
+	let maxEmploees = 120;
 	let upgradeSize = 6;
-	let industries = ['Agriculture']
+	let industries = ['Agriculture', 'Energy']
 	let upgrades = ['Smart Storage', 'Smart Factories', 'Wilson Analytics', 'Neural Accelerators', 'Project Insight', 'Nuoptimal Nootropic Injector Implants', 'FocusWires', 'DreamSense', 'Speech Processor Implants', 'ABC SalesBots']
 	let unlocks = ['Smart Supply', 'Office API', 'Warehouse API', 'Shady Accounting', 'Government Partnership', 'Export', 'Market Research - Demand', 'Shady Accounting', 'Market Data - Competition']
 	let cities = ['Aevum', 'Chongqing', 'Sector-12', 'New Tokyo', 'Ishima', 'Volhaven']
@@ -36,6 +36,7 @@ export async function main(ns) {
 				await manageWarehouse(division, city, 10)
 				await manageEmployees(division, city)
 				await manageMaterials(division, city, 1)
+				//await manageProducts(division, city, 1)
 			}
 		}
 
@@ -46,7 +47,7 @@ export async function main(ns) {
 	async function manageUpgrades(priority) {
 		for (let upgrade of upgrades)
 			if (ns.corporation.getUpgradeLevelCost(upgrade) < funds(priority)) {
-				log(ns, 'i', `upgrade ${upgrade}`)
+				log(ns, 'c', `upgrade ${upgrade}`)
 				ns.corporation.levelUpgrade(upgrade)
 			}
 	}
@@ -55,7 +56,7 @@ export async function main(ns) {
 		for (let unlock of unlocks)
 			if (!ns.corporation.hasUnlockUpgrade(unlock) &&
 				ns.corporation.getUnlockUpgradeCost(unlock) < funds(priority)) {
-				log(ns, 'i', `unlock ${unlock}`)
+				log(ns, 'c', `unlock ${unlock}`)
 				ns.corporation.unlockUpgrade(unlock)
 			}
 	}
@@ -64,7 +65,7 @@ export async function main(ns) {
 		for (let research of researches)
 			if (!ns.corporation.hasResearched(division.name, research) &&
 				ns.corporation.getResearchCost(division.name, research) < ns.corporation.getDivision(division.name).research) {
-				log(ns, 'i', `research ${research} in ${division.name}`)
+				log(ns, 'c', `research ${research} in ${division.name}`)
 				ns.corporation.research(division.name, research)
 			}
 	}
@@ -72,14 +73,14 @@ export async function main(ns) {
 	async function manageExpansion(corp) {
 		for (let industry of industries)
 			if (!corp.divisions.map(d => d.type).includes(industry) && ns.corporation.getExpandIndustryCost(industry) < funds()) {
-				log(ns, 'i', `expand industry ${industry}`)
+				log(ns, 'c', `expand industry ${industry}`)
 				ns.corporation.expandIndustry(industry, industry)
 			}
 
 		for (let division of corp.divisions)
 			for (let city of cities)
 				if (!division.cities.includes(city) && ns.corporation.getExpandCityCost() < funds()) {
-					log(ns, 'i', `expand city ${city} in ${division.name}`)
+					log(ns, 'c', `expand city ${city} in ${division.name}`)
 					ns.corporation.expandCity(division.name, city)
 				}
 	}
@@ -93,7 +94,7 @@ export async function main(ns) {
 		let vacancy = ns.corporation.getOffice(division.name, city).size - ns.corporation.getOffice(division.name, city).employees.length
 
 		if (!vacancy) return;
-		log(ns, 'i', `hire ${vacancy} employees in ${division.name} ${city}`)
+		log(ns, 'c', `hire ${vacancy} employees in ${division.name} ${city}`)
 		for (let o of Array(vacancy)) ns.corporation.hireEmployee(division.name, city)
 	}
 
@@ -114,6 +115,7 @@ export async function main(ns) {
 	function shuffle(array) { return array.sort(() => Math.random() - 0.5); }
 
 	async function manageEmployees(division, city) {
+		log(ns, 'c', `manage employees in ${division.name} ${city}`)
 		let employees = shuffle(ns.corporation.getOffice(division.name, city).employees)
 
 		let allResearched = true
@@ -137,7 +139,7 @@ export async function main(ns) {
 		log(ns, 'i', `in ${division.name} ${city} warehouse size is ${numToString(size)} used ${numToString(sizeUsed)}`)
 
 		if (size / sizeUsed > 2) {
-			log(ns, 'i', `buy ${realEstate}`)
+			log(ns, 'c', `buy ${realEstate} in ${division.name} ${city}`)
 			if (ns.corporation.hasResearched(division.name, researches[0]) &&
 				ns.corporation.getMaterial(division.name, city, realEstate).cost * 1e6 < funds(priority))
 				ns.corporation.bulkPurchase(division.name, city, realEstate, 1e6)

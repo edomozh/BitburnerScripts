@@ -6,7 +6,7 @@ export function settings() {
             info: true, 
             success: true,
             debug: true,
-            common: false
+            common: true
         },
         hackfile: "actor.js"
     }
