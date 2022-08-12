@@ -95,7 +95,10 @@ export async function main(ns) {
 
 		if (!vacancy) return;
 		log(ns, 'c', `hire ${vacancy} employees in ${division.name} ${city}`)
-		for (let o of Array(vacancy)) ns.corporation.hireEmployee(division.name, city)
+		for (let o of Array(vacancy)) {
+			let emp = ns.corporation.hireEmployee(division.name, city)
+			await ns.corporation.assignJob(division.name, city, emp.name, jobs[5])
+		}
 	}
 
 	async function manageWarehouse(division, city, priority) {
