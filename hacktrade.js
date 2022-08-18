@@ -11,7 +11,7 @@ export async function main(ns) {
 
     
 
-    let pids = [];
+    let pids = []
     let virus = settings().hackfile
     let home = "home"
     let stock = "ICRS"

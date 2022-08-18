@@ -1,3 +1,5 @@
+import { log, numToString } from 'core.js'
+
 /** @param {NS} ns */
 export async function main(ns) {
 	ns.tail()
@@ -5,9 +7,9 @@ export async function main(ns) {
 	ns.clearLog()
 
 	let maxservers = ns.args[0] || 10
-	let startram = Math.pow(2, 5) // 32 (3.5m)
-	let maxram = Math.pow(2, 15) // 32,768
-	let endless = false
+	let startram = Math.pow(2, ns.args[1] || 5) // 32 (3.5m)
+	let maxram = Math.pow(2, ns.args[2] || 15) // 32,768
+	let endless = true
 
 	let money = () => ns.getPlayer().money
 	let scost = (r) => ns.getPurchasedServerCost(r)
@@ -23,19 +25,19 @@ export async function main(ns) {
 		let r = sram(w)
 		ns.killall(w)
 		ns.deleteServer(w)
-		ns.print(`INFO ${w} ${r} deleted`)
+		log(ns, 'c', `${w} ${r} deleted`)
 	}
 
 	function logNextServerCost(r) {
 		let ram = count() ? sram(largest()) * 2 : startram
-		ns.print(`INFO Next server with ${ram} RAM will cost ${scost(ram).toLocaleString()}$`)
+		log(ns, 'i', `Next server with ${ram} RAM will cost ${numToString(scost(ram))}`)
 	}
 
 	logNextServerCost()
 
 	async function purchase(r) {
 		let name = ns.purchaseServer(`home`, r)
-		ns.print(`INFO ${name} with ${r} RAM purchased for ${scost(r).toLocaleString()}$`)
+		log(ns, 'c', `${name} with ${r} RAM purchased for ${numToString(scost(r))}`)
 		logNextServerCost(r * 2)
 	}
 
@@ -54,6 +56,6 @@ export async function main(ns) {
 		if (count() < maxservers && money() > scost(ram))
 			await purchase(Math.min(ram, maxram))
 
-		await ns.sleep(60000)
+		await ns.sleep(6e3)
 	}
 }

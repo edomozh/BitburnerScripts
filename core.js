@@ -30,13 +30,13 @@ export function stringify(obj) {
 		.replaceAll(/[{}\[\]:,\"]/g, '')
 		.replaceAll(/^\s+$/gm, '')
 		.replaceAll(/\n\n/g, `\n`)
-		.replaceAll(/[0-9.][0-9.][0-9.][0-9.]+/g, numToString);
+		.replaceAll(/[0-9.][0-9.][0-9.][0-9.]+/g, numToString)
 
-	return result;
+	return result
 }
 
 export function numToString(num) {
-	if (!num) return num;
+	if (!num) return num
 
 	num = Number.parseInt(num)
 
@@ -249,13 +249,13 @@ export function getCompanyServer(symbol) {
 		["UNV", "Universal Energy", "univ-energy"],
 		["VITA", "VitaLife", "vitalife"],
 		["WDS", "Watchdog Security", ""]
-	];
+	]
 
-	return symbolMap.filter(m => m[0] == symbol)[0][2];
+	return symbolMap.filter(m => m[0] == symbol)[0][2]
 }
 
 export function msToSec(s) {
-	let t = s;
+	let t = s
 	t = Math.trunc(t)
 	var ms = t % 1000
 

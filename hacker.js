@@ -56,8 +56,8 @@ export async function main(ns) {
 
 			while (worker.resource >= 1) {
 				let target = targets.pop()
-				let threads;
-				let remember;
+				let threads
+				let remember
 
 				if (target) {
 					remember = true
@@ -69,8 +69,8 @@ export async function main(ns) {
 					target = busy[Math.floor(Math.random() * busy.length)]
 					target.action = ['grow', 'weaken'][Math.floor(Math.random() * 2)]
 				} else {
-					worker.resource = 0;
-					continue;
+					worker.resource = 0
+					continue
 				}
 
 				worker.resource -= threads

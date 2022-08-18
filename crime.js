@@ -1,10 +1,12 @@
+import { numToString, log } from 'core.js'
+
 /** @param {NS} ns **/
 export async function main(ns) {
     ns.tail()
     ns.disableLog('sleep')
 
     let profit = (c) => ns.singularity.getCrimeStats(c).money
-    
+
     let crimes = ['shoplift', 'rob a store', 'mug someone', 'larceny',
         'deal drugs', 'forge corporate bonds', 'traffick illegal arms',
         'homicide', 'grand theft auto', 'kidnap', 'assassination', 'heist']
@@ -19,7 +21,7 @@ export async function main(ns) {
 
         for (const crime of crimes) {
             if (ns.getCrimeChance(crime) >= trashhold) {
-                ns.print(`${crime} will bring : ${ns.singularity.getCrimeStats(crime).money.toLocaleString('en-US')}$`)
+                log(ns, 'i', `${crime} will bring ${numToString(profit(crime))}`)
                 await ns.sleep(ns.commitCrime(crime))
                 break
             }
