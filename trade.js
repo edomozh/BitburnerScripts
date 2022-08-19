@@ -56,7 +56,7 @@ export async function main(ns) {
 		let quantity = stockBuyQuantCalc(price, stock)
 
 		if (ns.stock.getVolatility(stock) <= 0.05) {
-			ns.stock.buy(stock, quantity)
+			ns.stock.buyStock(stock, quantity)
 			log(ns, "i", `buy ${stock} for ${numToString(quantity * price)}`)
 			stats.profit -= Number.parseInt(quantity * price)
 			portfolio.push({ sym: stock, value: price, shares: quantity })

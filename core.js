@@ -201,17 +201,16 @@ export async function infect(ns, file) {
 
 /** @param {NS} ns **/
 export async function buyPrograms(ns) {
+	ns.clearLog()
 	ns.tail()
 
-	let programs = ['ServerProfiler.exe', 'DeepscanV2.exe', 'HTTPWorm.exe',
-		'SQLInject.exe', 'Formulas.exe', 'FTPCrack.exe', 'BruteSSH.exe',
-		'relaySMTP.exe', 'DeepscanV1.exe', 'AutoLink.exe']
+	let programs = ['BruteSSH.exe', 'FTPCrack.exe', 'relaySMTP.exe', 'HTTPWorm.exe', 'SQLInject.exe',
+		'ServerProfiler.exe', 'DeepscanV1.exe', 'DeepscanV2.exe', 'AutoLink.exe', 'Formulas.exe']
 
-	ns.purchaseTor()
+	ns.singularity.purchaseTor()
 
 	for (const p of programs)
-		ns.purchaseProgram(p)
-
+		ns.singularity.purchaseProgram(p)
 }
 
 export function getCompanyServer(symbol) {
