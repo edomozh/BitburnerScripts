@@ -69,7 +69,7 @@ export async function main(ns) {
 		if (forecast < SELL_FC_THRESH) {
 			let i = portfolio.findIndex(obj => obj.sym === stock)
 			portfolio.splice(i, 1)
-			let stockPrice = ns.stock.sell(stock, pos[0])
+			let stockPrice = ns.stock.sellStock(stock, pos[0])
 			stats.profit += Number.parseInt(stockPrice * pos[0])
 			log(ns, "i", `sell ${stock} for ${numToString(pos[1] * pos[0])}`)
 		}

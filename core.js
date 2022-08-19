@@ -270,3 +270,19 @@ export function msToSec(s) {
 
 	return `t (${hours}:${mins}:${secs})`
 }
+
+/** @param {NS} ns **/
+export function readStatus(ns) {
+	let file = 'status.txt'
+	let status = ns.fileExists(file) ? JSON.parse(ns.read(file)) : {}
+	return stringify(status)
+}
+
+/** @param {NS} ns **/
+export function writeStatus(ns, field, value) {
+	let file = 'status.txt'
+	let status = ns.fileExists(file) ? JSON.parse(ns.read(file)) : {}
+	ns.clear(file)
+	status[field] = value
+	ns.write(file, JSON.stringify(status), 'a')
+}
