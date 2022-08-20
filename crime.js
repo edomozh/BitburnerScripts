@@ -16,13 +16,13 @@ export async function main(ns) {
 
     while (true) {
 
-        while (ns.isBusy())
+        while (ns.singularity.isBusy())
             await ns.sleep(10000)
 
         for (const crime of crimes) {
-            if (ns.getCrimeChance(crime) >= trashhold) {
+            if (ns.singularity.getCrimeChance(crime) >= trashhold) {
                 log(ns, 'i', `${crime} will bring ${numToString(profit(crime))}`)
-                await ns.sleep(ns.commitCrime(crime))
+                await ns.sleep(ns.singularity.commitCrime(crime))
                 break
             }
         }
