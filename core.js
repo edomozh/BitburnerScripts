@@ -199,20 +199,6 @@ export async function infect(ns, file) {
 		await ns.scp(file, server)
 }
 
-/** @param {NS} ns **/
-export async function buyPrograms(ns) {
-	ns.clearLog()
-	ns.tail()
-
-	let programs = ['BruteSSH.exe', 'FTPCrack.exe', 'relaySMTP.exe', 'HTTPWorm.exe', 'SQLInject.exe',
-		'ServerProfiler.exe', 'DeepscanV1.exe', 'DeepscanV2.exe', 'AutoLink.exe', 'Formulas.exe']
-
-	ns.singularity.purchaseTor()
-
-	for (const p of programs)
-		ns.singularity.purchaseProgram(p)
-}
-
 export function getCompanyServer(symbol) {
 	var symbolMap = [
 		["AERO", "AeroCorp", "aerocorp"],
@@ -275,7 +261,7 @@ export function msToSec(s) {
 export function readStatus(ns) {
 	let file = 'status.txt'
 	let status = ns.fileExists(file) ? JSON.parse(ns.read(file)) : {}
-	return stringify(status)
+	return status
 }
 
 /** @param {NS} ns **/

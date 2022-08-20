@@ -7,6 +7,9 @@ export async function main(ns) {
     while (true) {
         await ns.sleep(1000)
 
+        if (ns.hacknet.getPurchaseNodeCost() > 1e9)
+            return;
+
         if (ns.hacknet.getPurchaseNodeCost() < myMoney())
             ns.hacknet.purchaseNode()
 
