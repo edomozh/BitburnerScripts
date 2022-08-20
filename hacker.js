@@ -3,9 +3,9 @@ import { settings } from 'settings.js'
 
 /** @param {NS} ns */
 export async function main(ns) {
-	ns.tail()
 	ns.disableLog('ALL')
 	ns.clearLog()
+	ns.tail()
 
 	let scriptName = settings().hackfile
 	let poorTrash = ns.args[0] / 100 || 0.9
@@ -49,7 +49,6 @@ export async function main(ns) {
 		log(ns, 'i', `hacking ${hacking.length}`)
 		log(ns, 'd', `hacking ${hacking.map(s => s.args[0])}`)
 
-		log(ns, 'w', `${stringify(stats, null, 2)}`)
 
 		for (let worker of workers) {
 			worker.resource = resource(worker.hostname)
@@ -82,6 +81,7 @@ export async function main(ns) {
 			}
 		}
 
+		log(ns, 'w', `${stringify(stats, null, 2)}`)
 		await ns.sleep(5e3)
 
 		ns.clearLog()

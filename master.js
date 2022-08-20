@@ -2,9 +2,9 @@ import { readStatus } from 'core.js'
 
 /** @param {NS} ns */
 export async function main(ns) {
+    ns.killall()
     ns.clearLog()
     ns.tail()
-    ns.killall()
 
     let money = () => ns.getServerMoneyAvailable('home')
     let enough = (s) => ns.getServerMaxRam('home') > ns.getScriptRam(s)

@@ -1,6 +1,5 @@
 /** @param {NS} ns **/
 export async function main(ns) {
-    ns.disableLog('ALL')
 
     let myMoney = () => ns.getServerMoneyAvailable('home') * 0.5
 
