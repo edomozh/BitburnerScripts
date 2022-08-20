@@ -1,10 +1,12 @@
 /** @param {NS} ns **/
 export async function main(ns) {
 
-    let money = () => Math.min(10e6, ns.getServerMoneyAvailable('home') * 0.5)
+    if (ns.hacknet.getPurchaseNodeCost() > 10e6)
+        return
+
+    let money = () => ns.getServerMoneyAvailable('home') * 0.5
 
     while (true) {
-        await ns.sleep(1e3)
 
         if (ns.hacknet.getPurchaseNodeCost() < money())
             ns.hacknet.purchaseNode()
@@ -20,5 +22,7 @@ export async function main(ns) {
             if (ns.hacknet.getCoreUpgradeCost(i) < money())
                 ns.hacknet.upgradeCore(i)
         }
+
+        await ns.sleep(1e3)
     }
 }
