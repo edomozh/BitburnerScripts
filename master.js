@@ -6,35 +6,31 @@ export async function main(ns) {
     ns.clearLog()
     ns.tail()
 
-    let money = () => ns.getServerMoneyAvailable('home')
-    let enough = (s) => ns.getServerMaxRam('home') > ns.getScriptRam(s)
+    let enough = (s) => ns.getServerMaxRam('home') - ns.getServerUsedRam('home') > ns.getScriptRam(s)
 
     while (true) {
         var status = readStatus(ns)
 
-        if (enough('hacknet.js') && !ns.getRunningScript('hacknet.js', 'home') && money() < 1e9)
-            ns.exec('hacknet.js', 'home')
+        exec(ns, 'hacknet.js')
 
-        if (enough('hacker.js') && !ns.getRunningScript('hacker.js', 'home', 'allres'))
-            ns.exec('hacker.js', 'home', 1, 'allres')
+        exec(ns, 'hacker.js', 'allres')
 
-        if (enough('buyRam.js') && !ns.getRunningScript('buyRam.js', 'home') && money() < 1e9)
-            ns.exec('buyRam.js', 'home')
+        exec(ns, 'buyRam.js')
 
-        if (enough('buyPrograms.js') && !status.hasPrograms)
-            ns.exec('buyPrograms.js', 'home')
+        if (!status.hasPrograms) exec(ns, 'buyPrograms.js')
 
-        if (enough('buyTradeAccess.js') && !status.hasMarketAccess)
-            ns.exec('buyTradeAccess.js', 'home')
+        if (!status.hasMarketAccess) exec(ns, 'buyTradeAccess.js')
 
-        if (enough('trade.js') && status.hasMarketAccess && !ns.getRunningScript('trade.js', 'home'))
-            ns.exec('trade.js', 'home')
+        if (status.hasMarketAccess) exec(ns, 'trade.js')
 
-        if (enough('corporation.js') && status.hasCorporation && !ns.getRunningScript('corporation.js', 'home'))
-            ns.exec('corporation.js', 'home')
+        if (status.hasCorporation) exec(ns, 'corporation.js')
 
         await ns.sleep(60e3)
     }
-}
 
+    function exec(ns, scriptName, ...args) {
+        if (enough(scriptName) && !ns.getRunningScript(scriptName, 'home'))
+            ns.exec(scriptName, 'home', 1, ...args)
+    }
+}
 

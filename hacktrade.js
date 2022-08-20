@@ -9,8 +9,6 @@ export async function main(ns) {
 
     let status = {}
 
-    
-
     let pids = []
     let virus = settings().hackfile
     let home = "home"
