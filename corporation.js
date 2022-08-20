@@ -1,12 +1,12 @@
-import { log, stringify, numToString } from 'core.js'
+import { log, stringify, numToString, readStatus, writeStatus } from 'core.js'
 
 /** @param {NS} ns */
 export async function main(ns) {
 	ns.clearLog()
 	ns.tail()
 
-	let upgradeSize = 15
-	let industries = ['Agriculture', 'Healthcare']
+	let hireStep = 15
+
 	let upgrades = ['Smart Storage', 'Smart Factories', 'Wilson Analytics', 'Neural Accelerators', 'Project Insight', 'Nuoptimal Nootropic Injector Implants', 'FocusWires', 'DreamSense', 'Speech Processor Implants', 'ABC SalesBots']
 	let unlocks = ['Warehouse API', 'Office API', 'Smart Supply', 'Shady Accounting', 'Government Partnership', 'Export', 'Market Research - Demand', 'Shady Accounting', 'Market Data - Competition']
 	let cities = ['Aevum', 'Chongqing', 'Sector-12', 'New Tokyo', 'Ishima', 'Volhaven']
@@ -14,32 +14,36 @@ export async function main(ns) {
 	let researches = ['Bulk Purchasing', 'Hi-Tech R&D Laboratory', 'AutoBrew', 'AutoPartyManager', 'Automatic Drug Administration', 'Go-Juice', 'CPH4 Injections', 'Drones', 'Drones - Assembly', 'Drones - Transport', 'HRBuddy-Recruitment', 'HRBuddy-Training', 'JoyWire', 'Market-TA.I', 'Market-TA.II', 'Overclock', 'Sti.mu', 'Self-Correcting Assemblers']
 	let materials = ['Water', 'Energy', 'Food', 'Plants', 'AI Cores', 'Robots', 'Hardware', 'Real Estate']
 
-	let industriConfigs = [
+	let industries = [
 		{
 			name: 'Agriculture',
 			ownproduct: false,
 			products: ['Food', 'Plants'],
 			booster: 'Real Estate',
-			maxemp: 150
+			maxemp: 300
 		},
 		{
 			name: 'Healthcare',
 			ownproduct: true,
 			products: [],
 			booster: null,
-			maxemp: 120
+			maxemp: 300
 		}
 	]
 
 	let config = (name) => industriConfigs.find(c => c.name == name)
-	let funds = () => ns.corporation.getCorporation().funds / 2
+	let funds = () => ns.corporation.getCorporation().funds * 0.5
 
-	ns.corporation.createCorporation('AIcorp', true)
+	var status = readStatus(ns)
+	if (!status.hasCorporation && ns.getServerMoneyAvailable('home') > 150e9) {
+		ns.corporation.createCorporation('AIcorp', true)
+		writeStatus(ns, 'hasCorporation', true)
+	}
 
 	while (true) {
 		let corp = ns.corporation.getCorporation()
 
-		//await manageUnlocks()
+		await manageUnlocks()
 
 		//await manageExpansion(corp, 2)
 		//await manageDividends(corp)
@@ -48,7 +52,7 @@ export async function main(ns) {
 
 		for (let division of corp.divisions) {
 			await manageResearches(division)
-			
+
 			for (let city of division.cities) {
 				await manageOffice(division, city, 30)
 				await manageEmployees(division, city)
@@ -88,9 +92,9 @@ export async function main(ns) {
 
 	async function manageExpansion(corp) {
 		for (let industry of industries)
-			if (!corp.divisions.map(d => d.type).includes(industry) && ns.corporation.getExpandIndustryCost(industry) < funds()) {
-				log(ns, 'c', `expand industry ${industry}`)
-				ns.corporation.expandIndustry(industry, industry)
+			if (!corp.divisions.map(d => d.type).includes(industry.name) && ns.corporation.getExpandIndustryCost(industry.name) < funds()) {
+				log(ns, 'c', `expand industry ${industry.name}`)
+				ns.corporation.expandIndustry(industry.name, industry.name)
 			}
 
 		for (let division of corp.divisions)
@@ -105,8 +109,8 @@ export async function main(ns) {
 		if (!ns.corporation.hasUnlockUpgrade(unlocks[2])) return
 
 		if (ns.corporation.getOffice(division.name, city).size < config(division.name).maxemp &&
-			ns.corporation.getOfficeSizeUpgradeCost(division.name, city, upgradeSize) < funds())
-			ns.corporation.upgradeOfficeSize(division.name, city, upgradeSize)
+			ns.corporation.getOfficeSizeUpgradeCost(division.name, city, hireStep) < funds())
+			ns.corporation.upgradeOfficeSize(division.name, city, hireStep)
 
 		let office = ns.corporation.getOffice(division.name, city)
 		let vacancy = office.size - office.employees.length

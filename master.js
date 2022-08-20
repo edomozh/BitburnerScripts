@@ -11,26 +11,28 @@ export async function main(ns) {
     while (true) {
         var status = readStatus(ns)
 
-        exec(ns, 'hacknet.js')
+        if (!status.hasPrograms) await exec(ns, 'buyPrograms.js')
 
-        exec(ns, 'hacker.js', 'allres')
+        if (!status.hasMarketAccess) await exec(ns, 'buyTradeAccess.js')
 
-        exec(ns, 'buyRam.js')
+        await exec(ns, 'buyRam.js')
 
-        if (!status.hasPrograms) exec(ns, 'buyPrograms.js')
+        await exec(ns, 'hacknet.js')
 
-        if (!status.hasMarketAccess) exec(ns, 'buyTradeAccess.js')
+        await exec(ns, 'hacker.js', 'allres')
 
-        if (status.hasMarketAccess) exec(ns, 'trade.js')
+        if (status.hasMarketAccess) await exec(ns, 'trade.js')
 
-        if (status.hasCorporation) exec(ns, 'corporation.js')
+        if (status.hasCorporation) await exec(ns, 'corporation.js')
 
         await ns.sleep(60e3)
     }
 
-    function exec(ns, scriptName, ...args) {
+    /** @param {NS} ns */
+    async function exec(ns, scriptName, ...args) {
         if (enough(scriptName) && !ns.getRunningScript(scriptName, 'home'))
             ns.exec(scriptName, 'home', 1, ...args)
+        await ns.sleep(1e3)
     }
 }
 
