@@ -1,4 +1,4 @@
-import { getServers, rootServers, infect, log, msToSec, stringify, getDate } from 'core.js'
+import { getServers, rootServers, infect, log, msToSec, stringify, getDate } from 'all.js'
 import { settings } from 'settings.js'
 
 /** @param {NS} ns */

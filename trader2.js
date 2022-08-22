@@ -1,4 +1,4 @@
-import { getServers, numToString, log, getCompanyServer, msToSec } from 'core.js'
+import { getServers, numToString, log, getCompanyServer, msToSec } from 'all.js'
 import { settings } from 'settings.js'
 
 /** @param {NS} ns */

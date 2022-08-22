@@ -1,8 +1,12 @@
+import { writeStatus, log } from 'all.js'
+
 /** @param {NS} ns **/
 export async function main(ns) {
 
-    if (ns.hacknet.getPurchaseNodeCost() > 10e6)
+    if (ns.hacknet.getPurchaseNodeCost() > 10e6) {
+        writeStatus(ns, 'maxHackNodes', true)
         return
+    }
 
     let money = () => ns.getServerMoneyAvailable('home') * 0.5
 

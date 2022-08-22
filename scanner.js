@@ -1,4 +1,4 @@
-import { numToString, stringify } from 'core.js'
+import { numToString, stringify } from 'all.js'
 
 /** @param {NS} ns */
 export async function main(ns) {

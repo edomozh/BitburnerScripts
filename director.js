@@ -1,4 +1,4 @@
-import { log, stringify, numToString, readStatus, writeStatus } from 'core.js'
+import { log, stringify, numToString, readStatus, writeStatus } from 'all.js'
 
 /** @param {NS} ns */
 export async function main(ns) {
@@ -45,7 +45,7 @@ export async function main(ns) {
 
 		await manageUnlocks()
 
-		//await manageExpansion(corp, 2)
+		//await manageExpansion(corp)
 		//await manageDividends(corp)
 		//await manageShares(corp)
 		//await manageUpgrades(100)
@@ -54,11 +54,11 @@ export async function main(ns) {
 			await manageResearches(division)
 
 			for (let city of division.cities) {
-				await manageOffice(division, city, 30)
-				await manageEmployees(division, city)
-				await manageWarehouse(division, city, 20)
-				//await manageMaterials(division, city, 10)
-				//await manageProducts(division, city, 1)
+				//await manageOffice(division, city)
+				//await manageEmployees(division, city)
+				//await manageWarehouse(division, city)
+				//await manageMaterials(division, city)
+				//await manageProducts(division, city)
 			}
 		}
 

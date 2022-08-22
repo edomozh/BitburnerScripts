@@ -8,6 +8,6 @@ export function settings() {
             debug: true,
             common: true
         },
-        hackfile: "actor.js"
+        hackfile: "act.js"
     }
 }

@@ -1,4 +1,4 @@
-import { numToString, log } from 'core.js'
+import { numToString, log } from 'all.js'
 
 /** @param {NS} ns **/
 export async function main(ns) {

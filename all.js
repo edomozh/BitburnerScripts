@@ -92,7 +92,7 @@ export function cleanServers(ns) {
 	ns.tail()
 
 	let settings = "settings.js"
-	let core = "core.js"
+	let core = "all.js"
 
 	function clear(server) {
 		var ls = Array.from(ns.ls(server))
